@@ -1,0 +1,483 @@
+{
+  "@context": {
+    "@vocab": "https://bookitngo.com/schema#",
+    "schema": "https://schema.org/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "dcterms": "http://purl.org/dc/terms/",
+    "bookit": "https://bookitngo.com/schema#",
+    "Provenance": "bookit:Provenance",
+    "source": {
+      "@id": "bookit:source",
+      "@type": "xsd:string"
+    },
+    "observedAt": {
+      "@id": "bookit:observedAt",
+      "@type": "xsd:dateTime"
+    },
+    "method": {
+      "@id": "bookit:method",
+      "@type": "xsd:string"
+    },
+    "confidence": {
+      "@id": "bookit:confidence",
+      "@type": "xsd:decimal"
+    },
+    "TravelContext": "bookit:TravelContext",
+    "tripPurpose": {
+      "@id": "bookit:tripPurpose",
+      "@type": "xsd:string"
+    },
+    "geography": {
+      "@id": "bookit:geography",
+      "@type": "xsd:string"
+    },
+    "season": {
+      "@id": "bookit:season",
+      "@type": "xsd:string"
+    },
+    "companions": {
+      "@id": "bookit:companions",
+      "@type": "xsd:string"
+    },
+    "RecommendationRequest": "bookit:RecommendationRequest",
+    "profileId": {
+      "@id": "bookit:profileId",
+      "@type": "xsd:string"
+    },
+    "offerIds": {
+      "@id": "bookit:offerIds",
+      "@container": "@list"
+    },
+    "context": {
+      "@id": "bookit:context",
+      "@type": "@id"
+    },
+    "RecommendationEvidence": "bookit:RecommendationEvidence",
+    "preferenceId": {
+      "@id": "bookit:preferenceId",
+      "@type": "xsd:string"
+    },
+    "category": {
+      "@id": "bookit:category",
+      "@type": "xsd:string"
+    },
+    "value": {
+      "@id": "bookit:value"
+    },
+    "status": {
+      "@id": "bookit:status",
+      "@type": "xsd:string"
+    },
+    "strength": {
+      "@id": "bookit:strength",
+      "@type": "xsd:string"
+    },
+    "weight": {
+      "@id": "bookit:weight",
+      "@type": "xsd:decimal"
+    },
+    "provenance": {
+      "@id": "bookit:provenance"
+    },
+    "freshness": {
+      "@id": "bookit:freshness",
+      "@type": "xsd:string"
+    },
+    "RecommendationResponse": "bookit:RecommendationResponse",
+    "data": {
+      "@id": "bookit:data"
+    },
+    "RecommendationReceiptResponse": "bookit:RecommendationReceiptResponse",
+    "TravelerProfileInput": "bookit:TravelerProfileInput",
+    "displayName": {
+      "@id": "bookit:displayName",
+      "@type": "xsd:string"
+    },
+    "contact": {
+      "@id": "bookit:contact",
+      "@type": "@id"
+    },
+    "loyalty": {
+      "@id": "bookit:loyalty",
+      "@container": "@list"
+    },
+    "TravelerProfile": "bookit:TravelerProfile",
+    "id": {
+      "@id": "bookit:id",
+      "@type": "xsd:string"
+    },
+    "preferences": {
+      "@id": "bookit:preferences",
+      "@container": "@list"
+    },
+    "constraints": {
+      "@id": "bookit:constraints",
+      "@container": "@list"
+    },
+    "createdAt": {
+      "@id": "bookit:createdAt",
+      "@type": "xsd:dateTime"
+    },
+    "updatedAt": {
+      "@id": "bookit:updatedAt",
+      "@type": "xsd:dateTime"
+    },
+    "TravelerProfilePatch": "bookit:TravelerProfilePatch",
+    "PreferenceInput": "bookit:PreferenceInput",
+    "priority": {
+      "@id": "bookit:priority",
+      "@type": "xsd:integer"
+    },
+    "mode": {
+      "@id": "bookit:mode",
+      "@type": "xsd:string"
+    },
+    "freshUntil": {
+      "@id": "bookit:freshUntil",
+      "@type": "xsd:dateTime"
+    },
+    "lastConfirmedAt": {
+      "@id": "bookit:lastConfirmedAt",
+      "@type": "xsd:dateTime"
+    },
+    "Preference": "bookit:Preference",
+    "rankingEligible": {
+      "@id": "bookit:rankingEligible",
+      "@type": "xsd:boolean"
+    },
+    "MaxCabinConstraintInput": "bookit:MaxCabinConstraintInput",
+    "operator": {
+      "@id": "bookit:operator",
+      "@type": "xsd:string"
+    },
+    "effectiveUntil": {
+      "@id": "bookit:effectiveUntil",
+      "@type": "xsd:dateTime"
+    },
+    "BudgetConstraintInput": "bookit:BudgetConstraintInput",
+    "AirlineConstraintInput": "bookit:AirlineConstraintInput",
+    "LocationConstraintInput": "bookit:LocationConstraintInput",
+    "Constraint": "bookit:Constraint",
+    "ConsentGrantInput": "bookit:ConsentGrantInput",
+    "scope": {
+      "@id": "bookit:scope",
+      "@type": "xsd:string"
+    },
+    "expiresAt": {
+      "@id": "bookit:expiresAt",
+      "@type": "xsd:dateTime"
+    },
+    "actor": {
+      "@id": "bookit:actor",
+      "@type": "xsd:string"
+    },
+    "confirmed": {
+      "@id": "bookit:confirmed",
+      "@type": "xsd:boolean"
+    },
+    "Consent": "bookit:Consent",
+    "grantedAt": {
+      "@id": "bookit:grantedAt",
+      "@type": "xsd:dateTime"
+    },
+    "revokedAt": {
+      "@id": "bookit:revokedAt",
+      "@type": "xsd:dateTime"
+    },
+    "effective": {
+      "@id": "bookit:effective",
+      "@type": "xsd:boolean"
+    },
+    "TravelerProfileResponse": "bookit:TravelerProfileResponse",
+    "PreferenceListResponse": "bookit:PreferenceListResponse",
+    "ConstraintListResponse": "bookit:ConstraintListResponse",
+    "ConsentListResponse": "bookit:ConsentListResponse",
+    "ConsentResponse": "bookit:ConsentResponse",
+    "HotelCancelActionInput": "bookit:HotelCancelActionInput",
+    "action": {
+      "@id": "bookit:action",
+      "@type": "xsd:string"
+    },
+    "intent": {
+      "@id": "bookit:intent",
+      "@type": "@id"
+    },
+    "FlightBookingPrepareActionInput": "bookit:FlightBookingPrepareActionInput",
+    "HotelBookingPrepareActionInput": "bookit:HotelBookingPrepareActionInput",
+    "AgentAction": "bookit:AgentAction",
+    "receiptId": {
+      "@id": "bookit:receiptId",
+      "@type": "xsd:string"
+    },
+    "requiredScopes": {
+      "@id": "bookit:requiredScopes",
+      "@container": "@list"
+    },
+    "evaluation": {
+      "@id": "bookit:evaluation"
+    },
+    "idempotencyKey": {
+      "@id": "bookit:idempotencyKey",
+      "@type": "xsd:string"
+    },
+    "outcome": {
+      "@id": "bookit:outcome"
+    },
+    "servicingReceiptId": {
+      "@id": "bookit:servicingReceiptId",
+      "@type": "xsd:string"
+    },
+    "AgentActionResponse": "bookit:AgentActionResponse",
+    "AgentExecuteInput": "bookit:AgentExecuteInput",
+    "HotelCancelIntent": "bookit:HotelCancelIntent",
+    "tripId": {
+      "@id": "bookit:tripId",
+      "@type": "xsd:string"
+    },
+    "itemId": {
+      "@id": "bookit:itemId",
+      "@type": "xsd:string"
+    },
+    "previewId": {
+      "@id": "bookit:previewId",
+      "@type": "xsd:string"
+    },
+    "termsHash": {
+      "@id": "bookit:termsHash",
+      "@type": "xsd:string"
+    },
+    "FlightBookingPrepareIntent": "bookit:FlightBookingPrepareIntent",
+    "offerId": {
+      "@id": "bookit:offerId",
+      "@type": "xsd:string"
+    },
+    "cabin": {
+      "@id": "bookit:cabin",
+      "@type": "xsd:string"
+    },
+    "airline": {
+      "@id": "bookit:airline",
+      "@type": "xsd:string"
+    },
+    "totalAmount": {
+      "@id": "bookit:totalAmount",
+      "@type": "xsd:decimal"
+    },
+    "HotelBookingPrepareIntent": "bookit:HotelBookingPrepareIntent",
+    "location": {
+      "@id": "bookit:location",
+      "@type": "xsd:string"
+    },
+    "ActionReceiptResponse": "bookit:ActionReceiptResponse",
+    "WebhookInput": "bookit:WebhookInput",
+    "url": {
+      "@id": "bookit:url",
+      "@type": "@id"
+    },
+    "eventTypes": {
+      "@id": "bookit:eventTypes",
+      "@container": "@list"
+    },
+    "WebhookEvent": "bookit:WebhookEvent",
+    "type": {
+      "@id": "bookit:type",
+      "@type": "xsd:string"
+    },
+    "apiVersion": {
+      "@id": "bookit:apiVersion",
+      "@type": "xsd:string"
+    },
+    "timestamp": {
+      "@id": "bookit:timestamp",
+      "@type": "xsd:dateTime"
+    },
+    "app": {
+      "@id": "bookit:app"
+    },
+    "tenant": {
+      "@id": "bookit:tenant"
+    },
+    "TripInput": "bookit:TripInput",
+    "name": {
+      "@id": "bookit:name",
+      "@type": "xsd:string"
+    },
+    "Trip": "bookit:Trip",
+    "items": {
+      "@id": "bookit:items",
+      "@container": "@list"
+    },
+    "TripItemInput": "bookit:TripItemInput",
+    "bookingId": {
+      "@id": "bookit:bookingId",
+      "@type": "xsd:string"
+    },
+    "kind": {
+      "@id": "bookit:kind",
+      "@type": "xsd:string"
+    },
+    "TripItem": "bookit:TripItem",
+    "bookingStatus": {
+      "@id": "bookit:bookingStatus",
+      "@type": "xsd:string"
+    },
+    "servicing": {
+      "@id": "bookit:servicing",
+      "@type": "@id"
+    },
+    "TripItemServicing": "bookit:TripItemServicing",
+    "cancellation": {
+      "@id": "bookit:cancellation",
+      "@type": "xsd:string"
+    },
+    "TripListResponse": "bookit:TripListResponse",
+    "TripResponse": "bookit:TripResponse",
+    "TripItemResponse": "bookit:TripItemResponse",
+    "CancellationInput": "bookit:CancellationInput",
+    "CancellationPreview": "bookit:CancellationPreview",
+    "refundable": {
+      "@id": "bookit:refundable",
+      "@type": "xsd:boolean"
+    },
+    "refundEstimate": {
+      "@id": "bookit:refundEstimate"
+    },
+    "penaltyEstimate": {
+      "@id": "bookit:penaltyEstimate"
+    },
+    "CancellationPreviewResponse": "bookit:CancellationPreviewResponse",
+    "ServicingAction": "bookit:ServicingAction",
+    "actionId": {
+      "@id": "bookit:actionId",
+      "@type": "xsd:string"
+    },
+    "operation": {
+      "@id": "bookit:operation",
+      "@type": "xsd:string"
+    },
+    "estimateOnly": {
+      "@id": "bookit:estimateOnly",
+      "@type": "xsd:boolean"
+    },
+    "ActionResponse": "bookit:ActionResponse",
+    "Money": "bookit:Money",
+    "amount": {
+      "@id": "bookit:amount",
+      "@type": "xsd:decimal"
+    },
+    "currency": {
+      "@id": "bookit:currency",
+      "@type": "xsd:string"
+    },
+    "FlightSearch": "bookit:FlightSearch",
+    "origin": {
+      "@id": "bookit:origin",
+      "@type": "xsd:string"
+    },
+    "destination": {
+      "@id": "bookit:destination",
+      "@type": "xsd:string"
+    },
+    "departureDate": {
+      "@id": "bookit:departureDate",
+      "@type": "xsd:date"
+    },
+    "returnDate": {
+      "@id": "bookit:returnDate",
+      "@type": "xsd:date"
+    },
+    "tripType": {
+      "@id": "bookit:tripType",
+      "@type": "xsd:string"
+    },
+    "adults": {
+      "@id": "bookit:adults",
+      "@type": "xsd:integer"
+    },
+    "children": {
+      "@id": "bookit:children",
+      "@type": "xsd:integer"
+    },
+    "infants": {
+      "@id": "bookit:infants",
+      "@type": "xsd:integer"
+    },
+    "HotelSearch": "bookit:HotelSearch",
+    "checkIn": {
+      "@id": "bookit:checkIn",
+      "@type": "xsd:date"
+    },
+    "checkOut": {
+      "@id": "bookit:checkOut",
+      "@type": "xsd:date"
+    },
+    "rooms": {
+      "@id": "bookit:rooms",
+      "@type": "xsd:integer"
+    },
+    "nationality": {
+      "@id": "bookit:nationality",
+      "@type": "xsd:string"
+    },
+    "occupancies": {
+      "@id": "bookit:occupancies",
+      "@container": "@list"
+    },
+    "Contact": "bookit:Contact",
+    "email": {
+      "@id": "bookit:email",
+      "@type": "xsd:string"
+    },
+    "phone": {
+      "@id": "bookit:phone",
+      "@type": "xsd:string"
+    },
+    "countryCallingCode": {
+      "@id": "bookit:countryCallingCode",
+      "@type": "xsd:string"
+    },
+    "countryOfResidence": {
+      "@id": "bookit:countryOfResidence",
+      "@type": "xsd:string"
+    },
+    "TravelerContact": "bookit:TravelerContact",
+    "FlightBookingInput": "bookit:FlightBookingInput",
+    "acceptedTotal": {
+      "@id": "bookit:acceptedTotal",
+      "@type": "@id"
+    },
+    "travellers": {
+      "@id": "bookit:travellers",
+      "@container": "@list"
+    },
+    "HotelBookingInput": "bookit:HotelBookingInput",
+    "holder": {
+      "@id": "bookit:holder"
+    },
+    "Booking": "bookit:Booking",
+    "total": {
+      "@id": "bookit:total",
+      "@type": "@id"
+    },
+    "environment": {
+      "@id": "bookit:environment",
+      "@type": "xsd:string"
+    },
+    "BookingResponse": "bookit:BookingResponse",
+    "FlightOfferList": "bookit:FlightOfferList",
+    "meta": {
+      "@id": "bookit:meta"
+    },
+    "ErrorResponse": "bookit:ErrorResponse",
+    "error": {
+      "@id": "bookit:error"
+    }
+  },
+  "@type": "schema:Dataset",
+  "schema:name": "Bookit N Go API JSON-LD context",
+  "schema:description": "A JSON-LD @context for the objects Bookit N Go's own API contract declares: one class per component schema, one property per declared field, typed from the contract. Derived by script (derive-json-ld.py, 2026-10-02) from openapi/bookit-n-go-openapi.yaml.",
+  "dcterms:created": "2026-10-02",
+  "dcterms:source": [
+    "openapi/bookit-n-go-openapi.yaml"
+  ]
+}

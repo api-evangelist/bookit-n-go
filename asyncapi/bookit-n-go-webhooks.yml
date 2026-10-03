@@ -1,0 +1,17 @@
+generated: '2026-10-02'
+method: derived
+generator: derive-webhooks.py
+source:
+- openapi/bookit-n-go-openapi.yaml
+description: 'Event surface derived from the provider''s own OpenAPI: webhooks. No AsyncAPI document is published by the provider; this catalog
+  lists the events the contract names.'
+management_operations:
+- publicCreateWebhook
+- publicListWebhooks
+- publicDeleteWebhook
+- publicRotateWebhookSecret
+- publicListWebhookDeliveries
+events:
+- event: bookingStatus
+  description: Signed booking-status event delivered to a registered app endpoint
+  declared_in: webhooks

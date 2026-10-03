@@ -1,0 +1,344 @@
+generated: '2026-10-02'
+method: derived
+generator: derive-vocabulary.py
+source: openapi/bookit-n-go-openapi.yaml
+vocabulary:
+  name: Bookit N Go Domain Vocabulary
+  description: 'Terms declared by Bookit N Go''s own API contract: its resource groups, objects and enumerations, with the contract''s definitions.
+    Derived, not authored.'
+  version: '2026-10-02'
+  terms:
+  - term: Trips
+    definition: Sandbox trip grouping and hotel servicing workflows
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Flights
+    definition: Sandbox flight search, validation, fare, and booking operations
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Hotels
+    definition: Sandbox hotel search, validation, and booking operations
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Webhooks
+    definition: App-scoped webhook endpoint configuration and delivery history
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Travelers
+    definition: App-scoped traveler profiles, preferences, constraints, and consent
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Agent
+    definition: Supplier-neutral, consent-bound agent actions and receipts
+    tags:
+    - Resource Group
+    source: openapi/bookit-n-go-openapi.yaml
+  - term: Provenance
+    definition: 'Object declared by the contract with fields: source, observedAt, method, confidence.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Provenance
+  - term: TravelContext
+    definition: 'Object declared by the contract with fields: tripPurpose, geography, season, companions.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelContext
+  - term: RecommendationRequest
+    definition: 'Object declared by the contract with fields: profileId, offerIds, context.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/RecommendationRequest
+  - term: RecommendationEvidence
+    definition: 'Object declared by the contract with fields: preferenceId, category, value, status, strength, weight, provenance, freshness,
+      context.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/RecommendationEvidence
+  - term: RecommendationResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/RecommendationResponse
+  - term: RecommendationReceiptResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/RecommendationReceiptResponse
+  - term: TravelerProfileInput
+    definition: 'Object declared by the contract with fields: displayName, contact, loyalty.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelerProfileInput
+  - term: TravelerProfile
+    definition: 'Object declared by the contract with fields: id, displayName, contact, loyalty, provenance, preferences, constraints, createdAt,
+      updatedAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelerProfile
+  - term: TravelerProfilePatch
+    definition: 'Object declared by the contract with fields: displayName, contact, loyalty.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelerProfilePatch
+  - term: PreferenceInput
+    definition: 'Object declared by the contract with fields: category, value, priority, strength, context, mode, provenance, freshUntil, lastConfirmedAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/PreferenceInput
+  - term: Preference
+    definition: 'Object declared by the contract with fields: id, category, value, priority, strength, context, mode, provenance, freshUntil,
+      lastConfirmedAt, freshness, rankingEligible. (2 more)'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Preference
+  - term: MaxCabinConstraintInput
+    definition: 'Object declared by the contract with fields: category, operator, value, provenance, effectiveUntil.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/MaxCabinConstraintInput
+  - term: BudgetConstraintInput
+    definition: 'Object declared by the contract with fields: category, operator, value, provenance, effectiveUntil.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/BudgetConstraintInput
+  - term: AirlineConstraintInput
+    definition: 'Object declared by the contract with fields: category, operator, value, provenance, effectiveUntil.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/AirlineConstraintInput
+  - term: LocationConstraintInput
+    definition: 'Object declared by the contract with fields: category, operator, value, provenance, effectiveUntil.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/LocationConstraintInput
+  - term: Constraint
+    definition: 'Object declared by the contract with fields: id, category, operator, value, provenance, effectiveUntil, createdAt, updatedAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Constraint
+  - term: ConsentGrantInput
+    definition: 'Object declared by the contract with fields: scope, expiresAt, actor, provenance, confirmed.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ConsentGrantInput
+  - term: Consent
+    definition: 'Object declared by the contract with fields: id, scope, actor, provenance, status, grantedAt, expiresAt, revokedAt, effective.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Consent
+  - term: TravelerProfileResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelerProfileResponse
+  - term: PreferenceListResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/PreferenceListResponse
+  - term: ConstraintListResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ConstraintListResponse
+  - term: ConsentListResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ConsentListResponse
+  - term: ConsentResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ConsentResponse
+  - term: HotelCancelActionInput
+    definition: 'Object declared by the contract with fields: profileId, action, intent, actor.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelCancelActionInput
+  - term: FlightBookingPrepareActionInput
+    definition: 'Object declared by the contract with fields: profileId, action, intent, actor.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/FlightBookingPrepareActionInput
+  - term: HotelBookingPrepareActionInput
+    definition: 'Object declared by the contract with fields: profileId, action, intent, actor.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelBookingPrepareActionInput
+  - term: AgentAction
+    definition: 'Object declared by the contract with fields: receiptId, profileId, action, status, requiredScopes, evaluation, actor, idempotencyKey,
+      outcome, servicingReceiptId, createdAt, updatedAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/AgentAction
+  - term: AgentActionResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/AgentActionResponse
+  - term: AgentExecuteInput
+    definition: 'Object declared by the contract with fields: confirmed.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/AgentExecuteInput
+  - term: HotelCancelIntent
+    definition: 'Object declared by the contract with fields: tripId, itemId, previewId, termsHash.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelCancelIntent
+  - term: FlightBookingPrepareIntent
+    definition: 'Object declared by the contract with fields: offerId, cabin, airline, totalAmount.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/FlightBookingPrepareIntent
+  - term: HotelBookingPrepareIntent
+    definition: 'Object declared by the contract with fields: offerId, totalAmount, location.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelBookingPrepareIntent
+  - term: ActionReceiptResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ActionReceiptResponse
+  - term: WebhookInput
+    definition: 'Object declared by the contract with fields: url, eventTypes.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/WebhookInput
+  - term: WebhookEvent
+    definition: Signed canonical JSON. Receivers should reject timestamps older than five minutes and deduplicate by id. Transient failures retry
+      at most five times.
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/WebhookEvent
+  - term: TripInput
+    definition: 'Object declared by the contract with fields: name.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripInput
+  - term: Trip
+    definition: 'Object declared by the contract with fields: id, name, createdAt, updatedAt, items.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Trip
+  - term: TripItemInput
+    definition: 'Object declared by the contract with fields: bookingId, kind.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripItemInput
+  - term: TripItem
+    definition: 'Object declared by the contract with fields: id, bookingId, kind, createdAt, bookingStatus, servicing.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripItem
+  - term: TripItemServicing
+    definition: 'Object declared by the contract with fields: cancellation.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripItemServicing
+  - term: TripListResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripListResponse
+  - term: TripResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripResponse
+  - term: TripItemResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TripItemResponse
+  - term: CancellationInput
+    definition: 'Object declared by the contract with fields: previewId, termsHash, confirmed.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/CancellationInput
+  - term: CancellationPreview
+    definition: 'Object declared by the contract with fields: previewId, tripId, itemId, kind, termsHash, refundable, refundEstimate, penaltyEstimate,
+      expiresAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/CancellationPreview
+  - term: CancellationPreviewResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/CancellationPreviewResponse
+  - term: ServicingAction
+    definition: 'Object declared by the contract with fields: actionId, tripId, itemId, kind, operation, previewId, termsHash, status, refundEstimate,
+      penaltyEstimate, estimateOnly, createdAt. (1 more)'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ServicingAction
+  - term: ActionResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ActionResponse
+  - term: Money
+    definition: 'Object declared by the contract with fields: amount, currency.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Money
+  - term: FlightSearch
+    definition: 'Object declared by the contract with fields: origin, destination, departureDate, returnDate, tripType, adults, children, infants,
+      cabin, currency.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/FlightSearch
+  - term: HotelSearch
+    definition: 'Object declared by the contract with fields: destination, checkIn, checkOut, rooms, adults, children, currency, nationality,
+      occupancies.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelSearch
+  - term: Contact
+    definition: 'Object declared by the contract with fields: email, phone, countryCallingCode, countryOfResidence.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Contact
+  - term: TravelerContact
+    definition: 'Object declared by the contract with fields: email, phone, countryCallingCode, countryOfResidence.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/TravelerContact
+  - term: FlightBookingInput
+    definition: 'Object declared by the contract with fields: offerId, acceptedTotal, contact, travellers.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/FlightBookingInput
+  - term: HotelBookingInput
+    definition: 'Object declared by the contract with fields: offerId, acceptedTotal, holder, contact, rooms.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelBookingInput
+  - term: Booking
+    definition: 'Object declared by the contract with fields: id, type, status, offerId, total, environment, createdAt.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/Booking
+  - term: BookingResponse
+    definition: 'Object declared by the contract with fields: data.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/BookingResponse
+  - term: FlightOfferList
+    definition: 'Object declared by the contract with fields: data, meta.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/FlightOfferList
+  - term: ErrorResponse
+    definition: 'Object declared by the contract with fields: error.'
+    tags:
+    - Object
+    source: openapi/bookit-n-go-openapi.yaml#/components/schemas/ErrorResponse

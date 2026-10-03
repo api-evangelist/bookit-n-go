@@ -1,0 +1,409 @@
+openapi: 3.2.0
+info:
+  title: ZOE API by Bookit N Go Webhooks API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: 'Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+
+    Sandbox booking operations never execute live supplier or payment mutations.'
+security:
+- SandboxApiKey: []
+tags:
+- name: Webhooks
+  description: App-scoped webhook endpoint configuration and delivery history
+paths:
+  /webhooks:
+    post:
+      operationId: publicCreateWebhook
+      summary: Register a webhook endpoint
+      tags:
+      - Webhooks
+      description: The signingSecret is returned only by this response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookInput'
+      responses:
+        '201':
+          description: Webhook endpoint and one-time signing secret
+        '400':
+          $ref: '#/components/responses/Error'
+    get:
+      operationId: publicListWebhooks
+      summary: List app webhook endpoints (secrets redacted)
+      tags:
+      - Webhooks
+      responses:
+        '200':
+          description: App-scoped endpoint list
+        '401':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhookId}:
+    delete:
+      operationId: publicDeleteWebhook
+      summary: Delete a webhook endpoint
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '204':
+          description: Deleted
+        '404':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhookId}/rotate-secret:
+    post:
+      operationId: publicRotateWebhookSecret
+      summary: Rotate and return a signing secret once
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Endpoint and one-time replacement signing secret
+        '404':
+          $ref: '#/components/responses/Error'
+  /webhooks/{webhookId}/deliveries:
+    get:
+      operationId: publicListWebhookDeliveries
+      summary: List delivery status for an endpoint
+      tags:
+      - Webhooks
+      parameters:
+      - $ref: '#/components/parameters/WebhookId'
+      responses:
+        '200':
+          description: Delivery history including attempt counts
+        '404':
+          $ref: '#/components/responses/Error'
+webhooks:
+  bookingStatus:
+    post:
+      operationId: receiveZoeBookingStatusWebhook
+      summary: Signed booking-status event delivered to a registered app endpoint
+      tags:
+      - Webhooks
+      parameters:
+      - name: X-ZOE-Event-Id
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-ZOE-Event
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-ZOE-Timestamp
+        in: header
+        required: true
+        schema:
+          type: string
+      - name: X-ZOE-Signature
+        in: header
+        required: true
+        schema:
+          type: string
+          pattern: ^v1=[a-f0-9]{64}$
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEvent'
+      responses:
+        '200':
+          description: Event accepted by the consumer
+        '400':
+          description: Consumer rejected the event
+components:
+  schemas:
+    TripItem:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - bookingId
+      - kind
+      - createdAt
+      - bookingStatus
+      - servicing
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+        createdAt:
+          type: string
+          format: date-time
+        bookingStatus:
+          type: string
+          enum:
+          - PENDING
+          - CONFIRMED
+          - FAILED
+          - CANCELLED
+          - UNKNOWN
+        servicing:
+          $ref: '#/components/schemas/TripItemServicing'
+    ServicingAction:
+      type: object
+      additionalProperties: false
+      required:
+      - actionId
+      - tripId
+      - itemId
+      - kind
+      - operation
+      - previewId
+      - termsHash
+      - refundEstimate
+      - penaltyEstimate
+      - estimateOnly
+      - status
+      - createdAt
+      - updatedAt
+      properties:
+        actionId:
+          type: string
+        tripId:
+          type: string
+        itemId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+        operation:
+          type: string
+          const: HOTEL_CANCELLATION
+        previewId:
+          type: string
+        termsHash:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - COMPLETED
+          - UNKNOWN
+          - FAILED
+        refundEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        penaltyEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        estimateOnly:
+          type: boolean
+          const: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    WebhookEvent:
+      type: object
+      description: Signed canonical JSON. Receivers should reject timestamps older than five minutes and deduplicate by id. Transient failures retry at most five times.
+      required:
+      - id
+      - type
+      - apiVersion
+      - timestamp
+      - data
+      - app
+      - tenant
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - flight.booking.created
+          - flight.booking.updated
+          - hotel.booking.created
+          - hotel.booking.updated
+          - trip.created
+          - trip.item.added
+          - hotel.booking.cancelled
+          - servicing.action.completed
+          - servicing.action.unknown
+        apiVersion:
+          type: string
+          const: '1'
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          description: Event-specific public data. The populated member is selected by type.
+          additionalProperties: false
+          properties:
+            booking:
+              type: object
+              additionalProperties: false
+              required:
+              - id
+              - kind
+              - status
+              properties:
+                id:
+                  type: string
+                kind:
+                  type: string
+                  enum:
+                  - FLIGHT
+                  - HOTEL
+                status:
+                  type: string
+                  enum:
+                  - PENDING
+                  - CONFIRMED
+                  - FAILED
+            trip:
+              $ref: '#/components/schemas/Trip'
+            item:
+              $ref: '#/components/schemas/TripItem'
+            action:
+              $ref: '#/components/schemas/ServicingAction'
+        app:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+        tenant:
+          type: object
+          required:
+          - id
+          properties:
+            id:
+              type: string
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    TripItemServicing:
+      type: object
+      additionalProperties: false
+      required:
+      - cancellation
+      properties:
+        cancellation:
+          type: string
+          enum:
+          - SUPPORTED
+          - UNSUPPORTED
+          - UNAVAILABLE
+    WebhookInput:
+      type: object
+      required:
+      - url
+      - eventTypes
+      properties:
+        url:
+          type: string
+          format: uri
+          pattern: ^https://
+        eventTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+            - flight.booking.created
+            - flight.booking.updated
+            - hotel.booking.created
+            - hotel.booking.updated
+            - trip.created
+            - trip.item.added
+            - hotel.booking.cancelled
+            - servicing.action.completed
+            - servicing.action.unknown
+    Trip:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - createdAt
+      - updatedAt
+      - items
+      properties:
+        id:
+          type: string
+        name:
+          type:
+          - string
+          - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripItem'
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+  responses:
+    Error:
+      description: Public API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    WebhookId:
+      name: webhookId
+      in: path
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.

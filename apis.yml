@@ -1,23 +1,209 @@
 aid: bookit-n-go
 name: Bookit N Go
-description: 'Bookit N Go is a company surfaced via the API Evangelist harvest backlog (source: secondary-market)
-  and added to the network as a stub for full-pipeline profiling.'
+image: https://framerusercontent.com/assets/Y4bHVpvh3wTsSQ15KjZon2JhwE8.png
+description: Bookit N Go is an AI‑powered travel technology SaaS platform that provides white‑labeled solutions for OTAs, corporate travel managers,
+  TMCs, distributors and startups. Their suite includes the Zoe AI engine for conversational booking, the Nevo corporate travel platform, Trava
+  consumer portal, and Nexel B2B partner platform, enabling rapid launch of branded travel services with full data control and AI‑driven personalization.
 url: https://raw.githubusercontent.com/api-evangelist/bookit-n-go/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:secondary-market
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-10-02 (modular-v1; was harvest)
 specificationVersion: '0.20'
 created: '2026-10-02'
 modified: '2026-10-02'
 tags:
-- Company
-apis: []
+- Travel
+- SaaS
+- AI
+- White-label
+- B2B
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/bookit-n-go-agentic-access.yml
+- type: Spectral
+  url: rules/bookit-n-go-rules.yml
+- type: JSONLD
+  url: json-ld/bookit-n-go-context.jsonld
+- type: Vocabulary
+  url: vocabulary/bookit-n-go-vocabulary.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Webhooks
+  url: asyncapi/bookit-n-go-webhooks.yml
+- type: DataModel
+  url: data-model/bookit-n-go-data-model.yml
+- type: Idempotency
+  url: conventions/bookit-n-go-conventions.yml
+- type: Conventions
+  url: conventions/bookit-n-go-conventions.yml
+- type: ErrorCatalog
+  url: errors/bookit-n-go-problem-types.yml
+- type: Conformance
+  url: conformance/bookit-n-go-conformance.yml
+- type: Overlay
+  url: overlays/bookit-n-go-openapi-overlay.yaml
+- type: LLMsTxt
+  url: llms/bookit-n-go-llms.txt
+- type: Hosts
+  url: hosts/bookit-n-go-hosts.yml
+- type: Vendors
+  url: vendors/bookit-n-go-vendors.yml
+- type: APIReference
+  url: https://developers.bookitngo.com/llms.txt
+- type: Authentication
+  url: authentication/bookit-n-go-authentication.yml
+- type: DomainSecurity
+  url: security/bookit-n-go-domain-security.yml
 - type: Website
-  url: https://www.nasdaqprivatemarket.com/
+  url: https://www.bookitngo.com/
+- type: Documentation
+  url: https://www.bookitngo.com/about
+- type: DeveloperPortal
+  url: https://start.bookitngo.com/
+- type: Blog
+  url: https://www.bookitngo.com/blog
+apis:
+- aid: bookit-n-go:bookit-n-go-agent-api
+  name: Bookit N Go Agent API
+  description: Supplier-neutral, consent-bound agent actions and receipts
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Agent
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-agent-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+- aid: bookit-n-go:bookit-n-go-flights-api
+  name: Bookit N Go Flights API
+  description: Sandbox flight search, validation, fare, and booking operations
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Flights
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-flights-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+- aid: bookit-n-go:bookit-n-go-hotels-api
+  name: Bookit N Go Hotels API
+  description: Sandbox hotel search, validation, and booking operations
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Hotels
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-hotels-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+- aid: bookit-n-go:bookit-n-go-travelers-api
+  name: Bookit N Go Travelers API
+  description: App-scoped traveler profiles, preferences, constraints, and consent
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Travelers
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-travelers-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+- aid: bookit-n-go:bookit-n-go-trips-api
+  name: Bookit N Go Trips API
+  description: Sandbox trip grouping and hotel servicing workflows
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Trips
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-trips-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+- aid: bookit-n-go:bookit-n-go-webhooks-api
+  name: Bookit N Go Webhooks API
+  description: App-scoped webhook endpoint configuration and delivery history
+  humanURL: https://developers.bookitngo.com/
+  baseURL: https://developers.bookitngo.com
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/bookit-n-go-webhooks-api-openapi.yml
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-preference-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-hotel-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-search-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-flight-booking-input-schema.json
+  - type: JSONSchema
+    url: json-schema/bookit-n-go-recommendation-response-schema.json
+x-enrichment:
+  date: '2026-10-02'
+  status: enriched
+  artifacts_added: 31
+  pass: modular-v1
+  engine: identity=local,contract=local,surfaces=local,docs=local,regulatory=local

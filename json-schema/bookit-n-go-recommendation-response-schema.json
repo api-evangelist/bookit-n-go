@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/bookit-n-go/main/json-schema/bookit-n-go-recommendation-response-schema.json",
+  "title": "RecommendationResponse",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/bookit-n-go-openapi.yaml#/components/schemas/RecommendationResponse",
+  "type": "object",
+  "required": [
+    "data"
+  ],
+  "properties": {
+    "data": {
+      "type": "object",
+      "required": [
+        "receiptId",
+        "kind",
+        "results",
+        "receipt"
+      ],
+      "properties": {
+        "receiptId": {
+          "type": "string"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "FLIGHT",
+            "HOTEL"
+          ]
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "offer",
+              "score",
+              "evidence"
+            ],
+            "properties": {
+              "offer": {
+                "type": "object"
+              },
+              "score": {
+                "type": "number"
+              },
+              "evidence": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/RecommendationEvidence"
+                }
+              }
+            }
+          }
+        },
+        "receipt": {
+          "type": "object"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "RecommendationEvidence": {
+      "type": "object",
+      "required": [
+        "category",
+        "status",
+        "strength",
+        "weight",
+        "freshness"
+      ],
+      "properties": {
+        "preferenceId": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "value": {},
+        "status": {
+          "type": "string",
+          "enum": [
+            "MATCHED",
+            "NOT_MATCHED",
+            "UNEVALUABLE",
+            "REQUIRED_VIOLATION"
+          ]
+        },
+        "strength": {
+          "type": "string",
+          "enum": [
+            "REQUIRED",
+            "STRONG",
+            "PREFERRED",
+            "FLEXIBLE"
+          ]
+        },
+        "weight": {
+          "type": "number"
+        },
+        "provenance": {},
+        "freshness": {
+          "type": "string"
+        },
+        "context": {
+          "$ref": "#/$defs/TravelContext"
+        }
+      }
+    },
+    "TravelContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tripPurpose": {
+          "type": "string",
+          "enum": [
+            "BUSINESS",
+            "LEISURE",
+            "BLEISURE",
+            "OTHER"
+          ]
+        },
+        "geography": {
+          "type": "string",
+          "minLength": 1
+        },
+        "season": {
+          "type": "string",
+          "minLength": 1
+        },
+        "companions": {
+          "type": "string",
+          "enum": [
+            "SOLO",
+            "PARTNER",
+            "FAMILY",
+            "COLLEAGUES",
+            "GROUP"
+          ]
+        }
+      }
+    }
+  }
+}

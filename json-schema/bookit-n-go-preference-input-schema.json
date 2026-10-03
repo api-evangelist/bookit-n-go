@@ -1,0 +1,147 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/bookit-n-go/main/json-schema/bookit-n-go-preference-input-schema.json",
+  "title": "PreferenceInput",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/bookit-n-go-openapi.yaml#/components/schemas/PreferenceInput",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "category",
+    "value",
+    "provenance"
+  ],
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "FLIGHT_SEAT",
+        "CABIN",
+        "AIRLINE",
+        "HOTEL_ROOM",
+        "HOTEL_AMENITY",
+        "LOCATION",
+        "LOYALTY"
+      ]
+    },
+    "value": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "strength": {
+      "type": "string",
+      "enum": [
+        "REQUIRED",
+        "STRONG",
+        "PREFERRED",
+        "FLEXIBLE"
+      ],
+      "default": "PREFERRED"
+    },
+    "context": {
+      "$ref": "#/$defs/TravelContext"
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "DECLARED",
+        "OBSERVED"
+      ]
+    },
+    "provenance": {
+      "$ref": "#/$defs/Provenance"
+    },
+    "freshUntil": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "lastConfirmedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "Provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "observedAt",
+        "method"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "DECLARED",
+            "OBSERVED",
+            "IMPORTED"
+          ]
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "TravelContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tripPurpose": {
+          "type": "string",
+          "enum": [
+            "BUSINESS",
+            "LEISURE",
+            "BLEISURE",
+            "OTHER"
+          ]
+        },
+        "geography": {
+          "type": "string",
+          "minLength": 1
+        },
+        "season": {
+          "type": "string",
+          "minLength": 1
+        },
+        "companions": {
+          "type": "string",
+          "enum": [
+            "SOLO",
+            "PARTNER",
+            "FAMILY",
+            "COLLEAGUES",
+            "GROUP"
+          ]
+        }
+      }
+    }
+  }
+}

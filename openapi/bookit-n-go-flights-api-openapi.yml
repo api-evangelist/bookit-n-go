@@ -1,0 +1,477 @@
+openapi: 3.2.0
+info:
+  title: ZOE API by Bookit N Go Flights API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: 'Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+
+    Sandbox booking operations never execute live supplier or payment mutations.'
+security:
+- SandboxApiKey: []
+tags:
+- name: Flights
+  description: Sandbox flight search, validation, fare, and booking operations
+paths:
+  /flights/search:
+    post:
+      operationId: publicSearchFlights
+      summary: Search sandbox flight offers
+      tags:
+      - Flights
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightSearch'
+      responses:
+        '200':
+          description: Normalized sandbox offers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightOfferList'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+  /recommendations/flights:
+    post:
+      operationId: publicRankFlights
+      summary: Deterministically rank flight offers for a traveler
+      tags:
+      - Flights
+      description: Read-only hard-filter then weighted ranking. REQUIRED preferences are never traded away; missing fields are UNEVALUABLE.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecommendationRequest'
+      responses:
+        '200':
+          description: Ranked offers and durable receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+  /flights/{offerId}/revalidate:
+    post:
+      operationId: publicRevalidateFlight
+      summary: Revalidate a sandbox flight offer
+      tags:
+      - Flights
+      parameters:
+      - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Revalidation result
+        '401':
+          $ref: '#/components/responses/Error'
+  /flights/{offerId}/fare-rules:
+    get:
+      operationId: publicGetFlightFareRules
+      summary: Retrieve normalized flight fare rules
+      tags:
+      - Flights
+      parameters:
+      - $ref: '#/components/parameters/OfferId'
+      responses:
+        '200':
+          description: Normalized fare rules
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /flights/bookings:
+    post:
+      operationId: publicCreateFlightBooking
+      summary: Create a sandbox flight booking
+      tags:
+      - Flights
+      description: Creates a sandbox booking. Reusing the same key and body returns the original booking; reusing it with a different body returns 409.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightBookingInput'
+      responses:
+        '201':
+          description: Sandbox booking created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '200':
+          description: Idempotent replay
+          headers:
+            Idempotent-Replayed:
+              schema:
+                type: string
+                const: 'true'
+        '409':
+          $ref: '#/components/responses/Error'
+  /flights/bookings/{bookingId}:
+    get:
+      operationId: publicGetFlightBooking
+      summary: Retrieve a sandbox flight booking
+      tags:
+      - Flights
+      parameters:
+      - $ref: '#/components/parameters/BookingId'
+      responses:
+        '200':
+          description: Sandbox flight booking
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BookingResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+components:
+  schemas:
+    FlightOfferList:
+      type: object
+      required:
+      - data
+      - meta
+      properties:
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        meta:
+          type: object
+          properties:
+            environment:
+              type: string
+              const: SANDBOX
+    BookingResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Booking'
+    RecommendationRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - offerIds
+      properties:
+        profileId:
+          type: string
+          minLength: 1
+        offerIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        context:
+          $ref: '#/components/schemas/TravelContext'
+    FlightSearch:
+      type: object
+      required:
+      - origin
+      - destination
+      - departureDate
+      - tripType
+      - adults
+      properties:
+        origin:
+          type: string
+          minLength: 3
+          maxLength: 3
+        destination:
+          type: string
+          minLength: 3
+          maxLength: 3
+        departureDate:
+          type: string
+          format: date
+        returnDate:
+          type: string
+          format: date
+        tripType:
+          type: string
+          enum:
+          - ONE_WAY
+          - ROUND_TRIP
+        adults:
+          type: integer
+          minimum: 1
+        children:
+          type: integer
+          minimum: 0
+          default: 0
+        infants:
+          type: integer
+          minimum: 0
+          default: 0
+        cabin:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+          default: ECONOMY
+        currency:
+          type: string
+          default: CAD
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    Contact:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        countryCallingCode:
+          type: string
+        countryOfResidence:
+          type: string
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+    RecommendationResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          required:
+          - receiptId
+          - kind
+          - results
+          - receipt
+          properties:
+            receiptId:
+              type: string
+            kind:
+              type: string
+              enum:
+              - FLIGHT
+              - HOTEL
+            results:
+              type: array
+              items:
+                type: object
+                required:
+                - offer
+                - score
+                - evidence
+                properties:
+                  offer:
+                    type: object
+                  score:
+                    type: number
+                  evidence:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/RecommendationEvidence'
+            receipt:
+              type: object
+    RecommendationEvidence:
+      type: object
+      required:
+      - category
+      - status
+      - strength
+      - weight
+      - freshness
+      properties:
+        preferenceId:
+          type: string
+        category:
+          type: string
+        value: {}
+        status:
+          type: string
+          enum:
+          - MATCHED
+          - NOT_MATCHED
+          - UNEVALUABLE
+          - REQUIRED_VIOLATION
+        strength:
+          type: string
+          enum:
+          - REQUIRED
+          - STRONG
+          - PREFERRED
+          - FLEXIBLE
+        weight:
+          type: number
+        provenance: {}
+        freshness:
+          type: string
+        context:
+          $ref: '#/components/schemas/TravelContext'
+    FlightBookingInput:
+      type: object
+      required:
+      - offerId
+      - travellers
+      - contact
+      properties:
+        offerId:
+          type: string
+        acceptedTotal:
+          $ref: '#/components/schemas/Money'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        travellers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+            - type
+            - firstName
+            - lastName
+            - dateOfBirth
+            properties:
+              type:
+                type: string
+                enum:
+                - ADULT
+                - CHILD
+                - INFANT
+              firstName:
+                type: string
+              lastName:
+                type: string
+              dateOfBirth:
+                type: string
+                format: date
+    TravelContext:
+      type: object
+      additionalProperties: false
+      properties:
+        tripPurpose:
+          type: string
+          enum:
+          - BUSINESS
+          - LEISURE
+          - BLEISURE
+          - OTHER
+        geography:
+          type: string
+          minLength: 1
+        season:
+          type: string
+          minLength: 1
+        companions:
+          type: string
+          enum:
+          - SOLO
+          - PARTNER
+          - FAMILY
+          - COLLEAGUES
+          - GROUP
+    Booking:
+      type: object
+      required:
+      - id
+      - type
+      - status
+      - offerId
+      - environment
+      - createdAt
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum:
+          - flight_booking
+          - hotel_booking
+        status:
+          type: string
+          enum:
+          - PENDING
+          - CONFIRMED
+          - FAILED
+        offerId:
+          type: string
+        total:
+          $ref: '#/components/schemas/Money'
+        environment:
+          type: string
+          const: SANDBOX
+        createdAt:
+          type: string
+          format: date-time
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+  responses:
+    Error:
+      description: Public API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.

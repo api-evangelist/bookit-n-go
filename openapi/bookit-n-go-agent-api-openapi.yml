@@ -1,0 +1,388 @@
+openapi: 3.2.0
+info:
+  title: ZOE API by Bookit N Go Agent API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: 'Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+
+    Sandbox booking operations never execute live supplier or payment mutations.'
+security:
+- SandboxApiKey: []
+tags:
+- name: Agent
+  description: Supplier-neutral, consent-bound agent actions and receipts
+paths:
+  /agent/actions/prepare:
+    post:
+      operationId: publicPrepareAgentAction
+      summary: Prepare a supplier-neutral booking action
+      tags:
+      - Agent
+      description: Preparation does not book, charge, or contact a supplier.
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentActionInput'
+      responses:
+        '200':
+          description: Prepared action
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentActionResponse'
+  /agent/actions/{receiptId}/execute:
+    post:
+      operationId: publicExecuteAgentAction
+      summary: Execute a confirmed agent action
+      tags:
+      - Agent
+      description: Only HOTEL_CANCEL may execute. Booking preparation actions are preparation-only.
+      parameters:
+      - $ref: '#/components/parameters/ReceiptId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentExecuteInput'
+      responses:
+        '200':
+          description: Durable action receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionReceiptResponse'
+        '202':
+          description: Unknown outcome; inspect receipt
+  /agent/receipts/{receiptId}:
+    get:
+      operationId: publicGetAgentReceipt
+      summary: Retrieve an agent action receipt
+      tags:
+      - Agent
+      parameters:
+      - $ref: '#/components/parameters/ReceiptId'
+      responses:
+        '200':
+          description: Receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionReceiptResponse'
+  /recommendations/receipts/{receiptId}:
+    get:
+      operationId: publicGetRecommendationReceipt
+      summary: Retrieve a durable recommendation receipt
+      tags:
+      - Agent
+      parameters:
+      - $ref: '#/components/parameters/ReceiptId'
+      responses:
+        '200':
+          description: Recommendation receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationReceiptResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+components:
+  schemas:
+    FlightBookingPrepareActionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - action
+      - intent
+      - actor
+      properties:
+        profileId:
+          type: string
+        action:
+          type: string
+          const: FLIGHT_BOOKING_PREPARE
+        intent:
+          $ref: '#/components/schemas/FlightBookingPrepareIntent'
+        actor:
+          type: string
+          minLength: 1
+    HotelCancelIntent:
+      type: object
+      additionalProperties: false
+      required:
+      - tripId
+      - itemId
+      - previewId
+      - termsHash
+      properties:
+        tripId:
+          type: string
+        itemId:
+          type: string
+        previewId:
+          type: string
+        termsHash:
+          type: string
+    ActionReceiptResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ActionReceipt'
+    AgentActionResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/AgentAction'
+    AgentAction:
+      type: object
+      additionalProperties: false
+      required:
+      - receiptId
+      - profileId
+      - action
+      - status
+      - requiredScopes
+      - evaluation
+      - actor
+      - idempotencyKey
+      - outcome
+      - servicingReceiptId
+      - createdAt
+      - updatedAt
+      properties:
+        receiptId:
+          type: string
+        profileId:
+          type: string
+        action:
+          type: string
+          enum:
+          - HOTEL_CANCEL
+          - FLIGHT_BOOKING_PREPARE
+          - HOTEL_BOOKING_PREPARE
+        status:
+          type: string
+          enum:
+          - PREPARED
+          - IN_PROGRESS
+          - COMPLETED
+          - FAILED
+          - UNKNOWN
+        requiredScopes:
+          type: array
+          items:
+            type: string
+        evaluation:
+          type: object
+          additionalProperties: false
+          required:
+          - constraints
+          - freshPreferences
+          properties:
+            constraints:
+              type: string
+              enum:
+              - PASS
+              - FAIL
+            freshPreferences:
+              type: string
+              enum:
+              - APPLIED
+              - IGNORED
+        actor:
+          type: string
+        idempotencyKey:
+          type: string
+        outcome:
+          type: object
+          additionalProperties: true
+        servicingReceiptId:
+          type:
+          - string
+          - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    HotelBookingPrepareActionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - action
+      - intent
+      - actor
+      properties:
+        profileId:
+          type: string
+        action:
+          type: string
+          const: HOTEL_BOOKING_PREPARE
+        intent:
+          $ref: '#/components/schemas/HotelBookingPrepareIntent'
+        actor:
+          type: string
+          minLength: 1
+    AgentExecuteInput:
+      type: object
+      additionalProperties: false
+      required:
+      - confirmed
+      properties:
+        confirmed:
+          type: boolean
+          const: true
+    ActionReceipt:
+      $ref: '#/components/schemas/AgentAction'
+    HotelCancelActionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - action
+      - intent
+      - actor
+      properties:
+        profileId:
+          type: string
+        action:
+          type: string
+          const: HOTEL_CANCEL
+        intent:
+          $ref: '#/components/schemas/HotelCancelIntent'
+        actor:
+          type: string
+          minLength: 1
+    FlightBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required:
+      - offerId
+      properties:
+        offerId:
+          type: string
+        cabin:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+        airline:
+          type: string
+        totalAmount:
+          type: number
+          minimum: 0
+    HotelBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required:
+      - offerId
+      properties:
+        offerId:
+          type: string
+        totalAmount:
+          type: number
+          minimum: 0
+        location:
+          type: string
+    AgentActionInput:
+      oneOf:
+      - $ref: '#/components/schemas/HotelCancelActionInput'
+      - $ref: '#/components/schemas/FlightBookingPrepareActionInput'
+      - $ref: '#/components/schemas/HotelBookingPrepareActionInput'
+      discriminator:
+        propertyName: action
+        mapping:
+          HOTEL_CANCEL: '#/components/schemas/HotelCancelActionInput'
+          FLIGHT_BOOKING_PREPARE: '#/components/schemas/FlightBookingPrepareActionInput'
+          HOTEL_BOOKING_PREPARE: '#/components/schemas/HotelBookingPrepareActionInput'
+    RecommendationReceiptResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          required:
+          - receiptId
+          - version
+          - candidates
+          - decision
+          - rules
+          properties:
+            receiptId:
+              type: string
+            version:
+              type: string
+            candidates:
+              type: array
+              items:
+                type: object
+            decision:
+              type: object
+            rules:
+              type: object
+  responses:
+    Error:
+      description: Public API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+    ReceiptId:
+      name: receiptId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.

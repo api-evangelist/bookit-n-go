@@ -1,0 +1,855 @@
+openapi: 3.2.0
+info:
+  title: ZOE API by Bookit N Go Travelers API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: 'Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+
+    Sandbox booking operations never execute live supplier or payment mutations.'
+security:
+- SandboxApiKey: []
+tags:
+- name: Travelers
+  description: App-scoped traveler profiles, preferences, constraints, and consent
+paths:
+  /travelers/profiles:
+    post:
+      operationId: publicCreateTravelerProfile
+      summary: Create a traveler profile
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelerProfileInput'
+      responses:
+        '201':
+          description: Profile created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelerProfileResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+  /travelers/profiles/{profileId}:
+    parameters:
+    - $ref: '#/components/parameters/ProfileId'
+    get:
+      operationId: publicGetTravelerProfile
+      summary: Retrieve a traveler profile
+      tags:
+      - Travelers
+      responses:
+        '200':
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelerProfileResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+    patch:
+      operationId: publicUpdateTravelerProfile
+      summary: Update a traveler profile
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TravelerProfilePatch'
+      responses:
+        '200':
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TravelerProfileResponse'
+  /travelers/profiles/{profileId}/preferences:
+    get:
+      operationId: publicListTravelerPreferences
+      summary: List contextual preferences
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreferenceListResponse'
+    put:
+      operationId: publicReplaceTravelerPreferences
+      summary: Replace contextual preferences
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/PreferenceInput'
+      responses:
+        '200':
+          description: Preferences
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PreferenceListResponse'
+  /travelers/profiles/{profileId}/constraints:
+    get:
+      operationId: publicListTravelerConstraints
+      summary: List deterministic constraints (separate from preferences)
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      responses:
+        '200':
+          description: Constraints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintListResponse'
+    put:
+      operationId: publicReplaceTravelerConstraints
+      summary: Replace deterministic constraints
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/ConstraintInput'
+      responses:
+        '200':
+          description: Constraints
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConstraintListResponse'
+  /travelers/profiles/{profileId}/consents:
+    get:
+      operationId: publicListTravelerConsents
+      summary: List consent history
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      responses:
+        '200':
+          description: Consent history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentListResponse'
+    post:
+      operationId: publicGrantTravelerConsent
+      summary: Grant explicit consent
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConsentGrantInput'
+      responses:
+        '201':
+          description: Consent granted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentResponse'
+  /travelers/profiles/{profileId}/consents/{consentId}/revoke:
+    post:
+      operationId: publicRevokeTravelerConsent
+      summary: Revoke consent; revoked consent fails closed
+      tags:
+      - Travelers
+      parameters:
+      - $ref: '#/components/parameters/ProfileId'
+      - $ref: '#/components/parameters/ConsentId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required:
+              - actor
+              - confirmed
+              properties:
+                actor:
+                  type: string
+                  minLength: 1
+                confirmed:
+                  type: boolean
+                  const: true
+      responses:
+        '200':
+          description: Consent revoked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentResponse'
+components:
+  schemas:
+    TravelerProfileInput:
+      type: object
+      additionalProperties: false
+      required:
+      - displayName
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contact:
+          $ref: '#/components/schemas/TravelerContact'
+        loyalty:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - program
+            - memberId
+            properties:
+              program:
+                type: string
+              memberId:
+                type: string
+    AirlineConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: AIRLINE
+        operator:
+          type: string
+          enum:
+          - IN
+          - NOT_IN
+        value:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    TravelerProfilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contact:
+          $ref: '#/components/schemas/TravelerContact'
+        loyalty:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - program
+            - memberId
+            properties:
+              program:
+                type: string
+              memberId:
+                type: string
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    BudgetConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: BUDGET
+        operator:
+          type: string
+          const: LTE
+        value:
+          type: number
+          minimum: 0
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    TravelerProfileResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/TravelerProfile'
+    TravelContext:
+      type: object
+      additionalProperties: false
+      properties:
+        tripPurpose:
+          type: string
+          enum:
+          - BUSINESS
+          - LEISURE
+          - BLEISURE
+          - OTHER
+        geography:
+          type: string
+          minLength: 1
+        season:
+          type: string
+          minLength: 1
+        companions:
+          type: string
+          enum:
+          - SOLO
+          - PARTNER
+          - FAMILY
+          - COLLEAGUES
+          - GROUP
+    Constraint:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - category
+      - operator
+      - value
+      - provenance
+      - createdAt
+      - updatedAt
+      - effectiveUntil
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          enum:
+          - MAX_CABIN
+          - BUDGET
+          - AIRLINE
+          - LOCATION
+        operator:
+          type: string
+          enum:
+          - LTE
+          - EQ
+          - IN
+          - NOT_IN
+        value: {}
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConsentListResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Consent'
+    ConsentResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Consent'
+    PreferenceInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          enum:
+          - FLIGHT_SEAT
+          - CABIN
+          - AIRLINE
+          - HOTEL_ROOM
+          - HOTEL_AMENITY
+          - LOCATION
+          - LOYALTY
+        value:
+          oneOf:
+          - type: string
+          - type: array
+            minItems: 1
+            items:
+              type: string
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 100
+        strength:
+          type: string
+          enum:
+          - REQUIRED
+          - STRONG
+          - PREFERRED
+          - FLEXIBLE
+          default: PREFERRED
+        context:
+          $ref: '#/components/schemas/TravelContext'
+        mode:
+          type: string
+          enum:
+          - DECLARED
+          - OBSERVED
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        freshUntil:
+          type: string
+          format: date-time
+        lastConfirmedAt:
+          type: string
+          format: date-time
+    ConstraintInput:
+      oneOf:
+      - $ref: '#/components/schemas/MaxCabinConstraintInput'
+      - $ref: '#/components/schemas/BudgetConstraintInput'
+      - $ref: '#/components/schemas/AirlineConstraintInput'
+      - $ref: '#/components/schemas/LocationConstraintInput'
+      discriminator:
+        propertyName: category
+    Provenance:
+      type: object
+      additionalProperties: false
+      required:
+      - source
+      - observedAt
+      - method
+      properties:
+        source:
+          type: string
+          minLength: 1
+        observedAt:
+          type: string
+          format: date-time
+        method:
+          type: string
+          enum:
+          - DECLARED
+          - OBSERVED
+          - IMPORTED
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+    TravelerContact:
+      type: object
+      additionalProperties: false
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        countryCallingCode:
+          type: string
+        countryOfResidence:
+          type: string
+    PreferenceListResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Preference'
+    TravelerProfile:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - displayName
+      - provenance
+      - preferences
+      - constraints
+      - createdAt
+      - updatedAt
+      properties:
+        id:
+          type: string
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contact:
+          oneOf:
+          - $ref: '#/components/schemas/TravelerContact'
+          - type: 'null'
+        loyalty:
+          oneOf:
+          - type: array
+            items:
+              type: object
+              additionalProperties: false
+              required:
+              - program
+              - memberId
+              properties:
+                program:
+                  type: string
+                memberId:
+                  type: string
+          - type: 'null'
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        preferences:
+          type: array
+          items:
+            $ref: '#/components/schemas/Preference'
+        constraints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Constraint'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    MaxCabinConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: MAX_CABIN
+        operator:
+          type: string
+          const: LTE
+        value:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    LocationConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: LOCATION
+        operator:
+          type: string
+          enum:
+          - EQ
+          - IN
+        value:
+          oneOf:
+          - type: string
+            minLength: 1
+          - type: array
+            minItems: 1
+            items:
+              type: string
+              minLength: 1
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    ConsentGrantInput:
+      type: object
+      additionalProperties: false
+      required:
+      - scope
+      - actor
+      - provenance
+      - confirmed
+      properties:
+        scope:
+          type: string
+          enum:
+          - PROFILE_READ
+          - PROFILE_WRITE
+          - PREFERENCE_WRITE
+          - BOOKING_PREPARE
+          - BOOKING_EXECUTE
+          - SERVICING_EXECUTE
+        expiresAt:
+          type: string
+          format: date-time
+        actor:
+          type: string
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        confirmed:
+          type: boolean
+          const: true
+    Consent:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - scope
+      - actor
+      - provenance
+      - status
+      - grantedAt
+      - effective
+      properties:
+        id:
+          type: string
+        scope:
+          type: string
+          enum:
+          - PROFILE_READ
+          - PROFILE_WRITE
+          - PREFERENCE_WRITE
+          - BOOKING_PREPARE
+          - BOOKING_EXECUTE
+          - SERVICING_EXECUTE
+        actor:
+          type: string
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        status:
+          type: string
+          enum:
+          - GRANTED
+          - REVOKED
+          - EXPIRED
+        grantedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        revokedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        effective:
+          type: boolean
+    Preference:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - category
+      - value
+      - priority
+      - mode
+      - provenance
+      - freshness
+      - rankingEligible
+      - createdAt
+      - updatedAt
+      - freshUntil
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          enum:
+          - FLIGHT_SEAT
+          - CABIN
+          - AIRLINE
+          - HOTEL_ROOM
+          - HOTEL_AMENITY
+          - LOCATION
+          - LOYALTY
+        value:
+          oneOf:
+          - type: string
+          - type: array
+            minItems: 1
+            items:
+              type: string
+        priority:
+          type: integer
+          minimum: 0
+          maximum: 100
+        strength:
+          type: string
+          enum:
+          - REQUIRED
+          - STRONG
+          - PREFERRED
+          - FLEXIBLE
+        context:
+          $ref: '#/components/schemas/TravelContext'
+        mode:
+          type: string
+          enum:
+          - DECLARED
+          - OBSERVED
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        freshUntil:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        lastConfirmedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        freshness:
+          type: string
+          enum:
+          - FRESH
+          - STALE
+        rankingEligible:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ConstraintListResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Constraint'
+  parameters:
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+    ConsentId:
+      name: consentId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
+  responses:
+    Error:
+      description: Public API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.

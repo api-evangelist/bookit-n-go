@@ -1,0 +1,13 @@
+generated: '2026-10-02'
+method: derived
+source: openapi/bookit-n-go-openapi.yaml
+summary:
+  types:
+  - http
+schemes:
+- name: SandboxApiKey
+  type: http
+  scheme: bearer
+  description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.
+  sources:
+  - openapi/bookit-n-go-openapi.yaml

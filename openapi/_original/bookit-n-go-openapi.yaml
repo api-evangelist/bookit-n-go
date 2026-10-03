@@ -1,0 +1,991 @@
+# x-archived-from: bookit-n-go-openapi.yaml
+# x-archived-on: 2026-10-02
+openapi: 3.1.0
+info:
+  title: ZOE API by Bookit N Go
+  version: 1.0.0
+  license: { name: Proprietary }
+  description: |
+    Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+    Sandbox booking operations never execute live supplier or payment mutations.
+security:
+  - SandboxApiKey: []
+tags:
+  - { name: Trips, description: "Sandbox trip grouping and hotel servicing workflows" }
+  - { name: Flights, description: "Sandbox flight search, validation, fare, and booking operations" }
+  - { name: Hotels, description: "Sandbox hotel search, validation, and booking operations" }
+  - { name: Webhooks, description: "App-scoped webhook endpoint configuration and delivery history" }
+  - { name: Travelers, description: "App-scoped traveler profiles, preferences, constraints, and consent" }
+  - { name: Agent, description: "Supplier-neutral, consent-bound agent actions and receipts" }
+paths:
+  /travelers/profiles:
+    post:
+      operationId: publicCreateTravelerProfile
+      summary: Create a traveler profile
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/TravelerProfileInput" } } } }
+      responses:
+        "201": { description: Profile created, content: { application/json: { schema: { $ref: "#/components/schemas/TravelerProfileResponse" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+  /travelers/profiles/{profileId}:
+    parameters: [{ $ref: "#/components/parameters/ProfileId" }]
+    get:
+      operationId: publicGetTravelerProfile
+      summary: Retrieve a traveler profile
+      tags: [Travelers]
+      responses:
+        "200": { description: Profile, content: { application/json: { schema: { $ref: "#/components/schemas/TravelerProfileResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+    patch:
+      operationId: publicUpdateTravelerProfile
+      summary: Update a traveler profile
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/TravelerProfilePatch" } } } }
+      responses:
+        "200": { description: Updated profile, content: { application/json: { schema: { $ref: "#/components/schemas/TravelerProfileResponse" } } } }
+  /travelers/profiles/{profileId}/preferences:
+    get:
+      operationId: publicListTravelerPreferences
+      summary: List contextual preferences
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }]
+      responses: { "200": { description: Preferences, content: { application/json: { schema: { $ref: "#/components/schemas/PreferenceListResponse" } } } } }
+    put:
+      operationId: publicReplaceTravelerPreferences
+      summary: Replace contextual preferences
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/PreferenceInput" } } } } }
+      responses: { "200": { description: Preferences, content: { application/json: { schema: { $ref: "#/components/schemas/PreferenceListResponse" } } } } }
+  /travelers/profiles/{profileId}/constraints:
+    get:
+      operationId: publicListTravelerConstraints
+      summary: List deterministic constraints (separate from preferences)
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }]
+      responses: { "200": { description: Constraints, content: { application/json: { schema: { $ref: "#/components/schemas/ConstraintListResponse" } } } } }
+    put:
+      operationId: publicReplaceTravelerConstraints
+      summary: Replace deterministic constraints
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { type: array, items: { $ref: "#/components/schemas/ConstraintInput" } } } } }
+      responses: { "200": { description: Constraints, content: { application/json: { schema: { $ref: "#/components/schemas/ConstraintListResponse" } } } } }
+  /travelers/profiles/{profileId}/consents:
+    get:
+      operationId: publicListTravelerConsents
+      summary: List consent history
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }]
+      responses: { "200": { description: Consent history, content: { application/json: { schema: { $ref: "#/components/schemas/ConsentListResponse" } } } } }
+    post:
+      operationId: publicGrantTravelerConsent
+      summary: Grant explicit consent
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/ConsentGrantInput" } } } }
+      responses: { "201": { description: Consent granted, content: { application/json: { schema: { $ref: "#/components/schemas/ConsentResponse" } } } } }
+  /travelers/profiles/{profileId}/consents/{consentId}/revoke:
+    post:
+      operationId: publicRevokeTravelerConsent
+      summary: Revoke consent; revoked consent fails closed
+      tags: [Travelers]
+      parameters: [{ $ref: "#/components/parameters/ProfileId" }, { $ref: "#/components/parameters/ConsentId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { type: object, additionalProperties: false, required: [actor, confirmed], properties: { actor: { type: string, minLength: 1 }, confirmed: { type: boolean, const: true } } } } } }
+      responses: { "200": { description: Consent revoked, content: { application/json: { schema: { $ref: "#/components/schemas/ConsentResponse" } } } } }
+  /agent/actions/prepare:
+    post:
+      operationId: publicPrepareAgentAction
+      summary: Prepare a supplier-neutral booking action
+      tags: [Agent]
+      description: Preparation does not book, charge, or contact a supplier.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AgentActionInput" } } } }
+      responses: { "200": { description: Prepared action, content: { application/json: { schema: { $ref: "#/components/schemas/AgentActionResponse" } } } } }
+  /agent/actions/{receiptId}/execute:
+    post:
+      operationId: publicExecuteAgentAction
+      summary: Execute a confirmed agent action
+      tags: [Agent]
+      description: Only HOTEL_CANCEL may execute. Booking preparation actions are preparation-only.
+      parameters: [{ $ref: "#/components/parameters/ReceiptId" }, { $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/AgentExecuteInput" } } } }
+      responses: { "200": { description: Durable action receipt, content: { application/json: { schema: { $ref: "#/components/schemas/ActionReceiptResponse" } } } }, "202": { description: Unknown outcome; inspect receipt } }
+  /agent/receipts/{receiptId}:
+    get:
+      operationId: publicGetAgentReceipt
+      summary: Retrieve an agent action receipt
+      tags: [Agent]
+      parameters: [{ $ref: "#/components/parameters/ReceiptId" }]
+      responses: { "200": { description: Receipt, content: { application/json: { schema: { $ref: "#/components/schemas/ActionReceiptResponse" } } } } }
+  /trips:
+    get:
+      operationId: publicListTrips
+      summary: List trips
+      tags: [Trips]
+      responses:
+        "200": { description: Trips visible to the authenticated app, content: { application/json: { schema: { $ref: "#/components/schemas/TripListResponse" }, example: { data: [{ id: "trip_01JTRIP", name: "Vancouver weekend", createdAt: "2026-01-15T12:00:00Z", updatedAt: "2026-01-15T12:00:00Z", items: [] }] } } } }
+    post:
+      operationId: publicCreateTrip
+      summary: Create a trip
+      tags: [Trips]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TripInput" }
+            example: { name: "Vancouver weekend" }
+      responses:
+        "201": { description: Trip created, content: { application/json: { schema: { $ref: "#/components/schemas/TripResponse" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+  /trips/{tripId}:
+    get:
+      operationId: publicGetTrip
+      summary: Retrieve a trip and its items
+      tags: [Trips]
+      parameters: [{ $ref: "#/components/parameters/TripId" }]
+      responses:
+        "200": { description: Trip, content: { application/json: { schema: { $ref: "#/components/schemas/TripResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /trips/{tripId}/items:
+    post:
+      operationId: publicAddTripItem
+      summary: Add an existing booking to a trip
+      tags: [Trips]
+      parameters: [{ $ref: "#/components/parameters/TripId" }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/TripItemInput" }
+            example: { bookingId: "book_hotel_01", kind: HOTEL }
+      responses:
+        "201": { description: Trip item added, content: { application/json: { schema: { $ref: "#/components/schemas/TripItemResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /trips/{tripId}/items/{itemId}/servicing/cancellation-preview:
+    post:
+      operationId: publicCreateCancellationPreview
+      summary: Preview hotel cancellation
+      tags: [Trips]
+      description: Returns a deterministic sandbox estimate. It does not contact a supplier or issue a refund. Previews expire at expiresAt and must not be used after expiry.
+      parameters:
+        - { $ref: "#/components/parameters/TripId" }
+        - { $ref: "#/components/parameters/TripItemId" }
+      responses:
+        "200": { description: Cancellation preview, content: { application/json: { schema: { $ref: "#/components/schemas/CancellationPreviewResponse" }, example: { data: { previewId: "prev_01", tripId: "trip_01JTRIP", itemId: "item_01", kind: HOTEL, termsHash: "sha256:abc", refundable: true, refundEstimate: { amount: 120, currency: CAD }, penaltyEstimate: null, expiresAt: "2026-01-15T12:10:00Z" } } } } }
+        "409": { $ref: "#/components/responses/Error" }
+        "422": { $ref: "#/components/responses/Error" }
+  /trips/{tripId}/items/{itemId}/servicing/cancel:
+    post:
+      operationId: publicCancelTripItem
+      summary: Cancel a hotel trip item
+      tags: [Trips]
+      description: Sandbox-only deterministic cancellation. The estimate is not a live refund. FLIGHT servicing is unsupported in this tranche. Use the same key to safely replay an ambiguous request.
+      parameters:
+        - { $ref: "#/components/parameters/TripId" }
+        - { $ref: "#/components/parameters/TripItemId" }
+        - { $ref: "#/components/parameters/IdempotencyKey" }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CancellationInput" }
+            example: { previewId: "prev_01", termsHash: "sha256:abc", confirmed: true }
+      responses:
+        "200": { description: Deterministic completion or exact idempotent replay, headers: { Idempotent-Replayed: { schema: { type: string, const: "true" }, description: "Present only for an exact replay." } }, content: { application/json: { schema: { $ref: "#/components/schemas/ActionResponse" } } } }
+        "202": { description: Outcome is UNKNOWN and requires receipt inspection; do not blind retry, content: { application/json: { schema: { $ref: "#/components/schemas/ActionResponse" } } } }
+        "409": { description: Idempotency conflict or stale terms, content: { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } } }
+        "410": { description: Preview expired, content: { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } } }
+        "422": { $ref: "#/components/responses/Error" }
+  /trips/{tripId}/servicing/actions/{actionId}:
+    get:
+      operationId: publicGetServicingAction
+      summary: Retrieve a servicing action receipt
+      tags: [Trips]
+      parameters:
+        - { $ref: "#/components/parameters/TripId" }
+        - { $ref: "#/components/parameters/ActionId" }
+      responses:
+        "200": { description: Action receipt, content: { application/json: { schema: { $ref: "#/components/schemas/ActionResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /webhooks:
+    post:
+      operationId: publicCreateWebhook
+      summary: Register a webhook endpoint
+      tags: [Webhooks]
+      description: The signingSecret is returned only by this response.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/WebhookInput" } } } }
+      responses:
+        "201": { description: Webhook endpoint and one-time signing secret }
+        "400": { $ref: "#/components/responses/Error" }
+    get:
+      operationId: publicListWebhooks
+      summary: List app webhook endpoints (secrets redacted)
+      tags: [Webhooks]
+      responses:
+        "200": { description: App-scoped endpoint list }
+        "401": { $ref: "#/components/responses/Error" }
+  /webhooks/{webhookId}:
+    delete:
+      operationId: publicDeleteWebhook
+      summary: Delete a webhook endpoint
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/WebhookId" }]
+      responses:
+        "204": { description: Deleted }
+        "404": { $ref: "#/components/responses/Error" }
+  /webhooks/{webhookId}/rotate-secret:
+    post:
+      operationId: publicRotateWebhookSecret
+      summary: Rotate and return a signing secret once
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/WebhookId" }]
+      responses:
+        "200": { description: Endpoint and one-time replacement signing secret }
+        "404": { $ref: "#/components/responses/Error" }
+  /webhooks/{webhookId}/deliveries:
+    get:
+      operationId: publicListWebhookDeliveries
+      summary: List delivery status for an endpoint
+      tags: [Webhooks]
+      parameters: [{ $ref: "#/components/parameters/WebhookId" }]
+      responses:
+        "200": { description: Delivery history including attempt counts }
+        "404": { $ref: "#/components/responses/Error" }
+  /flights/search:
+    post:
+      operationId: publicSearchFlights
+      summary: Search sandbox flight offers
+      tags: [Flights]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FlightSearch" } } } }
+      responses:
+        "200": { description: Normalized sandbox offers, content: { application/json: { schema: { $ref: "#/components/schemas/FlightOfferList" } } } }
+        "400": { $ref: "#/components/responses/Error" }
+        "401": { $ref: "#/components/responses/Error" }
+  /recommendations/flights:
+    post:
+      operationId: publicRankFlights
+      summary: Deterministically rank flight offers for a traveler
+      tags: [Flights]
+      description: Read-only hard-filter then weighted ranking. REQUIRED preferences are never traded away; missing fields are UNEVALUABLE.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/RecommendationRequest" } } } }
+      responses: { "200": { description: Ranked offers and durable receipt, content: { application/json: { schema: { $ref: "#/components/schemas/RecommendationResponse" } } } } }
+  /recommendations/hotels:
+    post:
+      operationId: publicRankHotels
+      summary: Deterministically rank hotel offers for a traveler
+      tags: [Hotels]
+      description: Read-only hard-filter then weighted ranking. REQUIRED preferences are never traded away; missing fields are UNEVALUABLE.
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/RecommendationRequest" } } } }
+      responses: { "200": { description: Ranked offers and durable receipt, content: { application/json: { schema: { $ref: "#/components/schemas/RecommendationResponse" } } } } }
+  /recommendations/receipts/{receiptId}:
+    get:
+      operationId: publicGetRecommendationReceipt
+      summary: Retrieve a durable recommendation receipt
+      tags: [Agent]
+      parameters: [{ $ref: "#/components/parameters/ReceiptId" }]
+      responses: { "200": { description: Recommendation receipt, content: { application/json: { schema: { $ref: "#/components/schemas/RecommendationReceiptResponse" } } } }, "404": { $ref: "#/components/responses/Error" } }
+  /flights/{offerId}/revalidate:
+    post:
+      operationId: publicRevalidateFlight
+      summary: Revalidate a sandbox flight offer
+      tags: [Flights]
+      parameters: [{ $ref: "#/components/parameters/OfferId" }]
+      responses:
+        "200": { description: Revalidation result }
+        "401": { $ref: "#/components/responses/Error" }
+  /flights/{offerId}/fare-rules:
+    get:
+      operationId: publicGetFlightFareRules
+      summary: Retrieve normalized flight fare rules
+      tags: [Flights]
+      parameters: [{ $ref: "#/components/parameters/OfferId" }]
+      responses:
+        "200": { description: Normalized fare rules }
+        "401": { $ref: "#/components/responses/Error" }
+        "404": { $ref: "#/components/responses/Error" }
+  /flights/bookings:
+    post:
+      operationId: publicCreateFlightBooking
+      summary: Create a sandbox flight booking
+      tags: [Flights]
+      description: Creates a sandbox booking. Reusing the same key and body returns the original booking; reusing it with a different body returns 409.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/FlightBookingInput" } } } }
+      responses:
+        "201": { description: Sandbox booking created, content: { application/json: { schema: { $ref: "#/components/schemas/BookingResponse" } } } }
+        "200": { description: Idempotent replay, headers: { Idempotent-Replayed: { schema: { type: string, const: "true" } } } }
+        "409": { $ref: "#/components/responses/Error" }
+  /flights/bookings/{bookingId}:
+    get:
+      operationId: publicGetFlightBooking
+      summary: Retrieve a sandbox flight booking
+      tags: [Flights]
+      parameters: [{ $ref: "#/components/parameters/BookingId" }]
+      responses:
+        "200": { description: Sandbox flight booking, content: { application/json: { schema: { $ref: "#/components/schemas/BookingResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+  /hotels/search:
+    post:
+      operationId: publicSearchHotels
+      summary: Search sandbox hotel offers
+      tags: [Hotels]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/HotelSearch" } } } }
+      responses:
+        "200": { description: Normalized sandbox offers }
+        "400": { $ref: "#/components/responses/Error" }
+  /hotels/{offerId}/revalidate:
+    post:
+      operationId: publicRevalidateHotel
+      summary: Revalidate a sandbox hotel offer
+      tags: [Hotels]
+      parameters: [{ $ref: "#/components/parameters/OfferId" }]
+      responses:
+        "200": { description: Revalidation result }
+        "401": { $ref: "#/components/responses/Error" }
+  /hotels/bookings:
+    post:
+      operationId: publicCreateHotelBooking
+      summary: Create a sandbox hotel booking
+      tags: [Hotels]
+      description: Creates a deterministic sandbox booking with durable duplicate protection.
+      parameters: [{ $ref: "#/components/parameters/IdempotencyKey" }]
+      requestBody: { required: true, content: { application/json: { schema: { $ref: "#/components/schemas/HotelBookingInput" } } } }
+      responses:
+        "201": { description: Sandbox booking created, content: { application/json: { schema: { $ref: "#/components/schemas/BookingResponse" } } } }
+        "200": { description: Idempotent replay }
+        "409": { $ref: "#/components/responses/Error" }
+  /hotels/bookings/{bookingId}:
+    get:
+      operationId: publicGetHotelBooking
+      summary: Retrieve a sandbox hotel booking
+      tags: [Hotels]
+      parameters: [{ $ref: "#/components/parameters/BookingId" }]
+      responses:
+        "200": { description: Sandbox hotel booking, content: { application/json: { schema: { $ref: "#/components/schemas/BookingResponse" } } } }
+        "404": { $ref: "#/components/responses/Error" }
+webhooks:
+  bookingStatus:
+    post:
+      operationId: receiveZoeBookingStatusWebhook
+      summary: Signed booking-status event delivered to a registered app endpoint
+      tags: [Webhooks]
+      parameters:
+        - { name: X-ZOE-Event-Id, in: header, required: true, schema: { type: string } }
+        - { name: X-ZOE-Event, in: header, required: true, schema: { type: string } }
+        - { name: X-ZOE-Timestamp, in: header, required: true, schema: { type: string } }
+        - { name: X-ZOE-Signature, in: header, required: true, schema: { type: string, pattern: "^v1=[a-f0-9]{64}$" } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/WebhookEvent" }
+      responses:
+        "200": { description: Event accepted by the consumer }
+        "400": { description: Consumer rejected the event }
+components:
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.
+  parameters:
+    ProfileId: { name: profileId, in: path, required: true, schema: { type: string, minLength: 1 } }
+    ConsentId: { name: consentId, in: path, required: true, schema: { type: string, minLength: 1 } }
+    ReceiptId: { name: receiptId, in: path, required: true, schema: { type: string, minLength: 1 } }
+    TripId: { name: tripId, in: path, required: true, schema: { type: string } }
+    TripItemId: { name: itemId, in: path, required: true, schema: { type: string } }
+    ActionId: { name: actionId, in: path, required: true, schema: { type: string } }
+    OfferId: { name: offerId, in: path, required: true, schema: { type: string } }
+    BookingId: { name: bookingId, in: path, required: true, schema: { type: string } }
+    WebhookId: { name: webhookId, in: path, required: true, schema: { type: string } }
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema: { type: string, minLength: 8, maxLength: 255 }
+  responses:
+    Error:
+      description: Public API error
+      content: { application/json: { schema: { $ref: "#/components/schemas/ErrorResponse" } } }
+  schemas:
+    Provenance:
+      type: object
+      additionalProperties: false
+      required: [source, observedAt, method]
+      properties:
+        source: { type: string, minLength: 1 }
+        observedAt: { type: string, format: date-time }
+        method: { type: string, enum: [DECLARED, OBSERVED, IMPORTED] }
+        confidence: { type: number, minimum: 0, maximum: 1 }
+    TravelContext:
+      type: object
+      additionalProperties: false
+      properties:
+        tripPurpose: { type: string, enum: [BUSINESS, LEISURE, BLEISURE, OTHER] }
+        geography: { type: string, minLength: 1 }
+        season: { type: string, minLength: 1 }
+        companions: { type: string, enum: [SOLO, PARTNER, FAMILY, COLLEAGUES, GROUP] }
+    RecommendationRequest:
+      type: object
+      additionalProperties: false
+      required: [profileId, offerIds]
+      properties:
+        profileId: { type: string, minLength: 1 }
+        offerIds: { type: array, minItems: 1, maxItems: 100, items: { type: string } }
+        context: { $ref: "#/components/schemas/TravelContext" }
+    RecommendationEvidence:
+      type: object
+      required: [category, status, strength, weight, freshness]
+      properties:
+        preferenceId: { type: string }
+        category: { type: string }
+        value: {}
+        status: { type: string, enum: [MATCHED, NOT_MATCHED, UNEVALUABLE, REQUIRED_VIOLATION] }
+        strength: { type: string, enum: [REQUIRED, STRONG, PREFERRED, FLEXIBLE] }
+        weight: { type: number }
+        provenance: {}
+        freshness: { type: string }
+        context: { $ref: "#/components/schemas/TravelContext" }
+    RecommendationResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [receiptId, kind, results, receipt]
+          properties:
+            receiptId: { type: string }
+            kind: { type: string, enum: [FLIGHT, HOTEL] }
+            results:
+              type: array
+              items:
+                type: object
+                required: [offer, score, evidence]
+                properties:
+                  offer: { type: object }
+                  score: { type: number }
+                  evidence: { type: array, items: { $ref: "#/components/schemas/RecommendationEvidence" } }
+            receipt: { type: object }
+    RecommendationReceiptResponse:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: object
+          required: [receiptId, version, candidates, decision, rules]
+          properties:
+            receiptId: { type: string }
+            version: { type: string }
+            candidates: { type: array, items: { type: object } }
+            decision: { type: object }
+            rules: { type: object }
+    TravelerProfileInput:
+      type: object
+      additionalProperties: false
+      required: [displayName]
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        contact: { $ref: "#/components/schemas/TravelerContact" }
+        loyalty: { type: array, items: { type: object, additionalProperties: false, required: [program, memberId], properties: { program: { type: string }, memberId: { type: string } } } }
+    TravelerProfile:
+      type: object
+      additionalProperties: false
+      required: [id, displayName, provenance, preferences, constraints, createdAt, updatedAt]
+      properties:
+        id: { type: string }
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        contact: { oneOf: [{ $ref: "#/components/schemas/TravelerContact" }, { type: "null" }] }
+        loyalty: { oneOf: [{ type: array, items: { type: object, additionalProperties: false, required: [program, memberId], properties: { program: { type: string }, memberId: { type: string } } } }, { type: "null" }] }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        preferences: { type: array, items: { $ref: "#/components/schemas/Preference" } }
+        constraints: { type: array, items: { $ref: "#/components/schemas/Constraint" } }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    TravelerProfilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        displayName: { type: string, minLength: 1, maxLength: 200 }
+        contact: { $ref: "#/components/schemas/TravelerContact" }
+        loyalty: { type: array, items: { type: object, additionalProperties: false, required: [program, memberId], properties: { program: { type: string }, memberId: { type: string } } } }
+    PreferenceInput:
+      type: object
+      additionalProperties: false
+      required: [category, value, provenance]
+      properties:
+        category: { type: string, enum: [FLIGHT_SEAT, CABIN, AIRLINE, HOTEL_ROOM, HOTEL_AMENITY, LOCATION, LOYALTY] }
+        value: { oneOf: [{ type: string }, { type: array, minItems: 1, items: { type: string } }] }
+        priority: { type: integer, minimum: 0, maximum: 100 }
+        strength: { type: string, enum: [REQUIRED, STRONG, PREFERRED, FLEXIBLE], default: PREFERRED }
+        context: { $ref: "#/components/schemas/TravelContext" }
+        mode: { type: string, enum: [DECLARED, OBSERVED] }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        freshUntil: { type: string, format: date-time }
+        lastConfirmedAt: { type: string, format: date-time }
+    Preference:
+      type: object
+      additionalProperties: false
+      required: [id, category, value, priority, mode, provenance, freshness, rankingEligible, createdAt, updatedAt, freshUntil]
+      properties:
+        id: { type: string }
+        category: { type: string, enum: [FLIGHT_SEAT, CABIN, AIRLINE, HOTEL_ROOM, HOTEL_AMENITY, LOCATION, LOYALTY] }
+        value: { oneOf: [{ type: string }, { type: array, minItems: 1, items: { type: string } }] }
+        priority: { type: integer, minimum: 0, maximum: 100 }
+        strength: { type: string, enum: [REQUIRED, STRONG, PREFERRED, FLEXIBLE] }
+        context: { $ref: "#/components/schemas/TravelContext" }
+        mode: { type: string, enum: [DECLARED, OBSERVED] }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        freshUntil: { type: [string, "null"], format: date-time }
+        lastConfirmedAt: { type: [string, "null"], format: date-time }
+        freshness: { type: string, enum: [FRESH, STALE] }
+        rankingEligible: { type: boolean }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ConstraintInput:
+      oneOf:
+        - $ref: "#/components/schemas/MaxCabinConstraintInput"
+        - $ref: "#/components/schemas/BudgetConstraintInput"
+        - $ref: "#/components/schemas/AirlineConstraintInput"
+        - $ref: "#/components/schemas/LocationConstraintInput"
+      discriminator: { propertyName: category }
+    MaxCabinConstraintInput:
+      type: object
+      additionalProperties: false
+      required: [category, operator, value, provenance]
+      properties:
+        category: { type: string, const: MAX_CABIN }
+        operator: { type: string, const: LTE }
+        value: { type: string, enum: [ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST] }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        effectiveUntil: { type: string, format: date-time }
+    BudgetConstraintInput:
+      type: object
+      additionalProperties: false
+      required: [category, operator, value, provenance]
+      properties:
+        category: { type: string, const: BUDGET }
+        operator: { type: string, const: LTE }
+        value: { type: number, minimum: 0 }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        effectiveUntil: { type: string, format: date-time }
+    AirlineConstraintInput:
+      type: object
+      additionalProperties: false
+      required: [category, operator, value, provenance]
+      properties:
+        category: { type: string, const: AIRLINE }
+        operator: { type: string, enum: [IN, NOT_IN] }
+        value: { type: array, minItems: 1, items: { type: string, minLength: 1 } }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        effectiveUntil: { type: string, format: date-time }
+    LocationConstraintInput:
+      type: object
+      additionalProperties: false
+      required: [category, operator, value, provenance]
+      properties:
+        category: { type: string, const: LOCATION }
+        operator: { type: string, enum: [EQ, IN] }
+        value:
+          oneOf:
+            - { type: string, minLength: 1 }
+            - { type: array, minItems: 1, items: { type: string, minLength: 1 } }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        effectiveUntil: { type: string, format: date-time }
+    Constraint:
+      type: object
+      additionalProperties: false
+      required: [id, category, operator, value, provenance, createdAt, updatedAt, effectiveUntil]
+      properties:
+        id: { type: string }
+        category: { type: string, enum: [MAX_CABIN, BUDGET, AIRLINE, LOCATION] }
+        operator: { type: string, enum: [LTE, EQ, IN, NOT_IN] }
+        value: {}
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        effectiveUntil: { type: [string, "null"], format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ConsentGrantInput:
+      type: object
+      additionalProperties: false
+      required: [scope, actor, provenance, confirmed]
+      properties:
+        scope: { type: string, enum: [PROFILE_READ, PROFILE_WRITE, PREFERENCE_WRITE, BOOKING_PREPARE, BOOKING_EXECUTE, SERVICING_EXECUTE] }
+        expiresAt: { type: string, format: date-time }
+        actor: { type: string }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        confirmed: { type: boolean, const: true }
+    Consent:
+      type: object
+      additionalProperties: false
+      required: [id, scope, actor, provenance, status, grantedAt, effective]
+      properties:
+        id: { type: string }
+        scope: { type: string, enum: [PROFILE_READ, PROFILE_WRITE, PREFERENCE_WRITE, BOOKING_PREPARE, BOOKING_EXECUTE, SERVICING_EXECUTE] }
+        actor: { type: string }
+        provenance: { $ref: "#/components/schemas/Provenance" }
+        status: { type: string, enum: [GRANTED, REVOKED, EXPIRED] }
+        grantedAt: { type: string, format: date-time }
+        expiresAt: { type: [string, "null"], format: date-time }
+        revokedAt: { type: [string, "null"], format: date-time }
+        effective: { type: boolean }
+    TravelerProfileResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { $ref: "#/components/schemas/TravelerProfile" } } }
+    PreferenceListResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { type: array, items: { $ref: "#/components/schemas/Preference" } } } }
+    ConstraintListResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { type: array, items: { $ref: "#/components/schemas/Constraint" } } } }
+    ConsentListResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { type: array, items: { $ref: "#/components/schemas/Consent" } } } }
+    ConsentResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { $ref: "#/components/schemas/Consent" } } }
+    AgentActionInput:
+      oneOf:
+        - $ref: "#/components/schemas/HotelCancelActionInput"
+        - $ref: "#/components/schemas/FlightBookingPrepareActionInput"
+        - $ref: "#/components/schemas/HotelBookingPrepareActionInput"
+      discriminator:
+        propertyName: action
+        mapping:
+          HOTEL_CANCEL: "#/components/schemas/HotelCancelActionInput"
+          FLIGHT_BOOKING_PREPARE: "#/components/schemas/FlightBookingPrepareActionInput"
+          HOTEL_BOOKING_PREPARE: "#/components/schemas/HotelBookingPrepareActionInput"
+    HotelCancelActionInput:
+      type: object
+      additionalProperties: false
+      required: [profileId, action, intent, actor]
+      properties:
+        profileId: { type: string }
+        action: { type: string, const: HOTEL_CANCEL }
+        intent: { $ref: "#/components/schemas/HotelCancelIntent" }
+        actor: { type: string, minLength: 1 }
+    FlightBookingPrepareActionInput:
+      type: object
+      additionalProperties: false
+      required: [profileId, action, intent, actor]
+      properties:
+        profileId: { type: string }
+        action: { type: string, const: FLIGHT_BOOKING_PREPARE }
+        intent: { $ref: "#/components/schemas/FlightBookingPrepareIntent" }
+        actor: { type: string, minLength: 1 }
+    HotelBookingPrepareActionInput:
+      type: object
+      additionalProperties: false
+      required: [profileId, action, intent, actor]
+      properties:
+        profileId: { type: string }
+        action: { type: string, const: HOTEL_BOOKING_PREPARE }
+        intent: { $ref: "#/components/schemas/HotelBookingPrepareIntent" }
+        actor: { type: string, minLength: 1 }
+    AgentAction:
+      type: object
+      additionalProperties: false
+      required: [receiptId, profileId, action, status, requiredScopes, evaluation, actor, idempotencyKey, outcome, servicingReceiptId, createdAt, updatedAt]
+      properties:
+        receiptId: { type: string }
+        profileId: { type: string }
+        action: { type: string, enum: [HOTEL_CANCEL, FLIGHT_BOOKING_PREPARE, HOTEL_BOOKING_PREPARE] }
+        status: { type: string, enum: [PREPARED, IN_PROGRESS, COMPLETED, FAILED, UNKNOWN] }
+        requiredScopes: { type: array, items: { type: string } }
+        evaluation: { type: object, additionalProperties: false, required: [constraints, freshPreferences], properties: { constraints: { type: string, enum: [PASS, FAIL] }, freshPreferences: { type: string, enum: [APPLIED, IGNORED] } } }
+        actor: { type: string }
+        idempotencyKey: { type: string }
+        outcome: { type: object, additionalProperties: true }
+        servicingReceiptId: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    AgentActionResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { $ref: "#/components/schemas/AgentAction" } } }
+    AgentExecuteInput:
+      type: object
+      additionalProperties: false
+      required: [confirmed]
+      properties: { confirmed: { type: boolean, const: true } }
+    HotelCancelIntent:
+      type: object
+      additionalProperties: false
+      required: [tripId, itemId, previewId, termsHash]
+      properties:
+        tripId: { type: string }
+        itemId: { type: string }
+        previewId: { type: string }
+        termsHash: { type: string }
+    FlightBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required: [offerId]
+      properties:
+        offerId: { type: string }
+        cabin: { type: string, enum: [ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST] }
+        airline: { type: string }
+        totalAmount: { type: number, minimum: 0 }
+    HotelBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required: [offerId]
+      properties:
+        offerId: { type: string }
+        totalAmount: { type: number, minimum: 0 }
+        location: { type: string }
+    ActionReceipt:
+      $ref: "#/components/schemas/AgentAction"
+    ActionReceiptResponse: { type: object, additionalProperties: false, required: [data], properties: { data: { $ref: "#/components/schemas/ActionReceipt" } } }
+    WebhookInput:
+      type: object
+      required: [url, eventTypes]
+      properties:
+        url: { type: string, format: uri, pattern: "^https://" }
+        eventTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items: { type: string, enum: [flight.booking.created, flight.booking.updated, hotel.booking.created, hotel.booking.updated, trip.created, trip.item.added, hotel.booking.cancelled, servicing.action.completed, servicing.action.unknown] }
+    WebhookEvent:
+      type: object
+      description: Signed canonical JSON. Receivers should reject timestamps older than five minutes and deduplicate by id. Transient failures retry at most five times.
+      required: [id, type, apiVersion, timestamp, data, app, tenant]
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [flight.booking.created, flight.booking.updated, hotel.booking.created, hotel.booking.updated, trip.created, trip.item.added, hotel.booking.cancelled, servicing.action.completed, servicing.action.unknown] }
+        apiVersion: { type: string, const: "1" }
+        timestamp: { type: string, format: date-time }
+        data:
+          type: object
+          description: Event-specific public data. The populated member is selected by type.
+          additionalProperties: false
+          properties:
+            booking:
+              type: object
+              additionalProperties: false
+              required: [id, kind, status]
+              properties:
+                id: { type: string }
+                kind: { type: string, enum: [FLIGHT, HOTEL] }
+                status: { type: string, enum: [PENDING, CONFIRMED, FAILED] }
+            trip: { $ref: "#/components/schemas/Trip" }
+            item: { $ref: "#/components/schemas/TripItem" }
+            action: { $ref: "#/components/schemas/ServicingAction" }
+        app: { type: object, required: [id], properties: { id: { type: string } } }
+        tenant: { type: object, required: [id], properties: { id: { type: string } } }
+    TripInput:
+      type: object
+      additionalProperties: false
+      properties:
+        name: { type: string, minLength: 1, maxLength: 200 }
+    Trip:
+      type: object
+      additionalProperties: false
+      required: [id, createdAt, updatedAt, items]
+      properties:
+        id: { type: string }
+        name: { type: [string, "null"] }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        items: { type: array, items: { $ref: "#/components/schemas/TripItem" } }
+    TripItemInput:
+      type: object
+      required: [bookingId, kind]
+      additionalProperties: false
+      properties:
+        bookingId: { type: string }
+        kind: { type: string, enum: [HOTEL, FLIGHT] }
+    TripItem:
+      type: object
+      additionalProperties: false
+      required: [id, bookingId, kind, createdAt, bookingStatus, servicing]
+      properties:
+        id: { type: string }
+        bookingId: { type: string }
+        kind: { type: string, enum: [HOTEL, FLIGHT] }
+        createdAt: { type: string, format: date-time }
+        bookingStatus: { type: string, enum: [PENDING, CONFIRMED, FAILED, CANCELLED, UNKNOWN] }
+        servicing: { $ref: "#/components/schemas/TripItemServicing" }
+    TripItemServicing:
+      type: object
+      additionalProperties: false
+      required: [cancellation]
+      properties:
+        cancellation: { type: string, enum: [SUPPORTED, UNSUPPORTED, UNAVAILABLE] }
+    TripListResponse:
+      type: object
+      required: [data]
+      properties: { data: { type: array, items: { $ref: "#/components/schemas/Trip" } } }
+    TripResponse:
+      type: object
+      required: [data]
+      properties: { data: { $ref: "#/components/schemas/Trip" } }
+    TripItemResponse:
+      type: object
+      required: [data]
+      properties: { data: { $ref: "#/components/schemas/TripItem" } }
+    CancellationInput:
+      type: object
+      required: [previewId, termsHash, confirmed]
+      additionalProperties: false
+      properties:
+        previewId: { type: string }
+        termsHash: { type: string }
+        confirmed: { type: boolean, const: true }
+    CancellationPreview:
+      type: object
+      required: [previewId, tripId, itemId, kind, termsHash, refundable, refundEstimate, penaltyEstimate, expiresAt]
+      properties:
+        previewId: { type: string }
+        tripId: { type: string }
+        itemId: { type: string }
+        kind: { type: string, const: HOTEL }
+        termsHash: { type: string, description: "Hash of the cancellation terms accepted by the caller." }
+        refundable: { type: boolean }
+        refundEstimate: { oneOf: [{ $ref: "#/components/schemas/Money" }, { type: "null" }], description: "Estimate only; no refund is issued by this API." }
+        penaltyEstimate: { oneOf: [{ $ref: "#/components/schemas/Money" }, { type: "null" }] }
+        expiresAt: { type: string, format: date-time }
+    CancellationPreviewResponse:
+      type: object
+      required: [data]
+      properties: { data: { $ref: "#/components/schemas/CancellationPreview" } }
+    ServicingAction:
+      type: object
+      additionalProperties: false
+      required: [actionId, tripId, itemId, kind, operation, previewId, termsHash, refundEstimate, penaltyEstimate, estimateOnly, status, createdAt, updatedAt]
+      properties:
+        actionId: { type: string }
+        tripId: { type: string }
+        itemId: { type: string }
+        kind: { type: string, enum: [HOTEL] }
+        operation: { type: string, const: HOTEL_CANCELLATION }
+        previewId: { type: string }
+        termsHash: { type: string }
+        status: { type: string, enum: [PENDING, COMPLETED, UNKNOWN, FAILED] }
+        refundEstimate: { oneOf: [{ $ref: "#/components/schemas/Money" }, { type: "null" }] }
+        penaltyEstimate: { oneOf: [{ $ref: "#/components/schemas/Money" }, { type: "null" }] }
+        estimateOnly: { type: boolean, const: true }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+    ActionResponse:
+      type: object
+      required: [data]
+      properties: { data: { $ref: "#/components/schemas/ServicingAction" } }
+    Money:
+      type: object
+      required: [amount, currency]
+      properties: { amount: { type: number, minimum: 0 }, currency: { type: string, minLength: 3, maxLength: 3 } }
+    FlightSearch:
+      type: object
+      required: [origin, destination, departureDate, tripType, adults]
+      properties:
+        origin: { type: string, minLength: 3, maxLength: 3 }
+        destination: { type: string, minLength: 3, maxLength: 3 }
+        departureDate: { type: string, format: date }
+        returnDate: { type: string, format: date }
+        tripType: { type: string, enum: [ONE_WAY, ROUND_TRIP] }
+        adults: { type: integer, minimum: 1 }
+        children: { type: integer, minimum: 0, default: 0 }
+        infants: { type: integer, minimum: 0, default: 0 }
+        cabin: { type: string, enum: [ECONOMY, PREMIUM_ECONOMY, BUSINESS, FIRST], default: ECONOMY }
+        currency: { type: string, default: CAD }
+    HotelSearch:
+      type: object
+      required: [destination, checkIn, checkOut, rooms, adults]
+      properties:
+        destination: { type: string }
+        checkIn: { type: string, format: date }
+        checkOut: { type: string, format: date }
+        rooms: { type: integer, minimum: 1 }
+        adults: { type: integer, minimum: 1 }
+        children: { type: integer, minimum: 0, default: 0 }
+        currency: { type: string, default: CAD }
+        nationality: { type: string, default: CA }
+        occupancies:
+          type: array
+          minItems: 1
+          description: Room-level occupancy. Preserve one item per room and provide one age for each child.
+          items:
+            type: object
+            required: [adults, children, childAges]
+            properties:
+              adults: { type: integer, minimum: 1 }
+              children: { type: integer, minimum: 0 }
+              childAges:
+                type: array
+                items: { type: integer, minimum: 0, maximum: 17 }
+    Contact:
+      type: object
+      required: [email]
+      properties: { email: { type: string, format: email }, phone: { type: string }, countryCallingCode: { type: string }, countryOfResidence: { type: string } }
+    TravelerContact:
+      type: object
+      additionalProperties: false
+      required: [email]
+      properties:
+        email: { type: string, format: email }
+        phone: { type: string }
+        countryCallingCode: { type: string }
+        countryOfResidence: { type: string }
+    FlightBookingInput:
+      type: object
+      required: [offerId, travellers, contact]
+      properties:
+        offerId: { type: string }
+        acceptedTotal: { $ref: "#/components/schemas/Money" }
+        contact: { $ref: "#/components/schemas/Contact" }
+        travellers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [type, firstName, lastName, dateOfBirth]
+            properties:
+              type: { type: string, enum: [ADULT, CHILD, INFANT] }
+              firstName: { type: string }
+              lastName: { type: string }
+              dateOfBirth: { type: string, format: date }
+    HotelBookingInput:
+      type: object
+      required: [offerId, holder, rooms, contact]
+      properties:
+        offerId: { type: string }
+        acceptedTotal: { $ref: "#/components/schemas/Money" }
+        holder:
+          type: object
+          required: [name, surname]
+          properties: { name: { type: string }, surname: { type: string } }
+        contact: { $ref: "#/components/schemas/Contact" }
+        rooms:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required: [guests]
+            properties:
+              guests:
+                type: array
+                minItems: 1
+                items:
+                  type: object
+                  required: [type, name, surname]
+                  properties: { type: { type: string, enum: [AD, CH] }, name: { type: string }, surname: { type: string }, age: { type: integer } }
+    Booking:
+      type: object
+      required: [id, type, status, offerId, environment, createdAt]
+      properties:
+        id: { type: string }
+        type: { type: string, enum: [flight_booking, hotel_booking] }
+        status: { type: string, enum: [PENDING, CONFIRMED, FAILED] }
+        offerId: { type: string }
+        total: { $ref: "#/components/schemas/Money" }
+        environment: { type: string, const: SANDBOX }
+        createdAt: { type: string, format: date-time }
+    BookingResponse:
+      type: object
+      required: [data]
+      properties: { data: { $ref: "#/components/schemas/Booking" } }
+    FlightOfferList:
+      type: object
+      required: [data, meta]
+      properties:
+        data: { type: array, items: { type: object, additionalProperties: true } }
+        meta: { type: object, properties: { environment: { type: string, const: SANDBOX } } }
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties: { code: { type: string }, message: { type: string }, requestId: { type: [string, "null"] }, details: {} }

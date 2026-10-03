@@ -1,0 +1,55 @@
+generated: '2026-10-02'
+method: derived
+generator: derive-problem-types.py
+source:
+- openapi/bookit-n-go-openapi.yaml
+format: custom
+envelope:
+  media_type: application/json
+  schema: ErrorResponse
+coverage:
+  operations: 37
+  statuses_declared: 6
+problems:
+- status: 400
+  title: Bad Request
+  description: Public API error
+  operations: 5
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 401
+  title: Unauthorized
+  description: Public API error
+  operations: 5
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 404
+  title: Not Found
+  description: Public API error
+  operations: 11
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 409
+  title: Conflict
+  description: Public API error
+  operations: 4
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 410
+  title: Gone
+  description: Preview expired
+  operations: 1
+  media_types:
+  - application/json
+  schema: ErrorResponse
+- status: 422
+  title: Unprocessable Content
+  description: Public API error
+  operations: 2
+  media_types:
+  - application/json
+  schema: ErrorResponse

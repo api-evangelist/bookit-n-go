@@ -1,0 +1,19 @@
+# ZOE API Developer Portal
+
+ZOE API is Bookit N Go's precise travel infrastructure for developers and AI agents.
+It supports Flights, Hotels, Trips, Agent Execution, Traveler Profiles, and Servicing in a deterministic sandbox.
+
+## Core Concepts
+- Authentication: Pass your key via `Authorization: Bearer zoe_sandbox_...` or `X-API-Key`. Configure clients with `ZOE_API_KEY` and `ZOE_API_BASE_URL`.
+- Environments: Keys generated in this portal are Sandbox-only. Production requires review.
+- Idempotency: Booking, servicing cancellation, traveler profile/preference/constraint/consent mutations, and agent prepare/execute require `Idempotency-Key`. Trip creation and attachment do not.
+- Webhooks: Verify HMAC-SHA256 signatures over `timestamp + "." + raw_body` using `X-ZOE-Signature`.
+
+## SDKs
+- TypeScript: local source package `@bookitngo/zoe-sdk`
+- Python: local source distribution and module `zoe_api`
+- MCP Server: local source package `@bookitngo/zoe-mcp` exposes strict, safe execution interfaces.
+
+## Documentation
+Full documentation is available at https://developers.bookitngo.com/docs/overview.
+OpenAPI 3.1 Specification is available at /openapi.yaml.

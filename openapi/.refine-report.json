@@ -1,0 +1,24 @@
+{
+  "provider": "bookit-n-go",
+  "sources": [
+    "bookit-n-go-openapi.yaml"
+  ],
+  "outputs": [
+    "bookit-n-go-agent-api-openapi.yml",
+    "bookit-n-go-flights-api-openapi.yml",
+    "bookit-n-go-hotels-api-openapi.yml",
+    "bookit-n-go-travelers-api-openapi.yml",
+    "bookit-n-go-trips-api-openapi.yml",
+    "bookit-n-go-webhooks-api-openapi.yml"
+  ],
+  "archived": [
+    "archived openapi/bookit-n-go-openapi.yaml"
+  ],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "bookit-n-go-openapi.yaml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: written (+6 apis, 6 total)"
+  ],
+  "skipped": []
+}

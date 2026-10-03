@@ -1,0 +1,9 @@
+openapi: 3.1.0
+info:
+  title: Bookit N Go API Overlay
+  version: '1.0'
+actions:
+  - op: add
+    path: /components/schemas/TravelerProfile
+    value:
+      description: Added by enrichment pipeline.

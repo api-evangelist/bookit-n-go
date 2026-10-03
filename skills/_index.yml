@@ -1,0 +1,37 @@
+generated: '2026-10-02'
+method: generated
+generator: extract-docs-artifacts.py skills (local)
+source: openapi/bookit-n-go-openapi.yaml
+skills:
+- file: skills/bookit-n-go-create-traveler-profile.md
+  name: bookit-n-go-create-traveler-profile
+  api: openapi/bookit-n-go-openapi.yaml
+  operations:
+  - publicCreateTravelerProfile
+  - publicReplaceTravelerPreferences
+  - publicReplaceTravelerConstraints
+  - publicGrantTravelerConsent
+- file: skills/bookit-n-go-book-trip.md
+  name: bookit-n-go-book-trip
+  api: openapi/bookit-n-go-openapi.yaml
+  operations:
+  - publicCreateTrip
+  - publicAddTripItem
+  - publicCreateCancellationPreview
+  - publicCancelTripItem
+- file: skills/bookit-n-go-flights-booking.md
+  name: bookit-n-go-flights-booking
+  api: openapi/bookit-n-go-openapi.yaml
+  operations:
+  - publicSearchFlights
+  - publicRankFlights
+  - publicCreateFlightBooking
+  - publicGetFlightBooking
+- file: skills/bookit-n-go-hotel-booking.md
+  name: bookit-n-go-hotel-booking
+  api: openapi/bookit-n-go-openapi.yaml
+  operations:
+  - publicSearchHotels
+  - publicRankHotels
+  - publicCreateHotelBooking
+  - publicGetHotelBooking

@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/api-evangelist/bookit-n-go/main/json-schema/bookit-n-go-hotel-booking-input-schema.json",
+  "title": "HotelBookingInput",
+  "x-generated": "2026-10-02",
+  "x-method": "derived",
+  "x-generator": "derive-json-schema.py",
+  "x-source": "openapi/bookit-n-go-openapi.yaml#/components/schemas/HotelBookingInput",
+  "type": "object",
+  "required": [
+    "offerId",
+    "holder",
+    "rooms",
+    "contact"
+  ],
+  "properties": {
+    "offerId": {
+      "type": "string"
+    },
+    "acceptedTotal": {
+      "$ref": "#/$defs/Money"
+    },
+    "holder": {
+      "type": "object",
+      "required": [
+        "name",
+        "surname"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "surname": {
+          "type": "string"
+        }
+      }
+    },
+    "contact": {
+      "$ref": "#/$defs/Contact"
+    },
+    "rooms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "guests"
+        ],
+        "properties": {
+          "guests": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": [
+                "type",
+                "name",
+                "surname"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "AD",
+                    "CH"
+                  ]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "surname": {
+                  "type": "string"
+                },
+                "age": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Contact": {
+      "type": "object",
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "countryCallingCode": {
+          "type": "string"
+        },
+        "countryOfResidence": {
+          "type": "string"
+        }
+      }
+    },
+    "Money": {
+      "type": "object",
+      "required": [
+        "amount",
+        "currency"
+      ],
+      "properties": {
+        "amount": {
+          "type": "number",
+          "minimum": 0
+        },
+        "currency": {
+          "type": "string",
+          "minLength": 3,
+          "maxLength": 3
+        }
+      }
+    }
+  }
+}

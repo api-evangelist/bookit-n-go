@@ -1,0 +1,522 @@
+openapi: 3.2.0
+info:
+  title: ZOE API by Bookit N Go Trips API
+  version: 1.0.0
+  license:
+    name: Proprietary
+  description: 'Versioned external API for deterministic ZOE sandbox flight, hotel, trip, and servicing workflows by Bookit N Go.
+
+    Sandbox booking operations never execute live supplier or payment mutations.'
+security:
+- SandboxApiKey: []
+tags:
+- name: Trips
+  description: Sandbox trip grouping and hotel servicing workflows
+paths:
+  /trips:
+    get:
+      operationId: publicListTrips
+      summary: List trips
+      tags:
+      - Trips
+      responses:
+        '200':
+          description: Trips visible to the authenticated app
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripListResponse'
+              example:
+                data:
+                - id: trip_01JTRIP
+                  name: Vancouver weekend
+                  createdAt: '2026-01-15T12:00:00Z'
+                  updatedAt: '2026-01-15T12:00:00Z'
+                  items: []
+    post:
+      operationId: publicCreateTrip
+      summary: Create a trip
+      tags:
+      - Trips
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripInput'
+            example:
+              name: Vancouver weekend
+      responses:
+        '201':
+          description: Trip created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+  /trips/{tripId}:
+    get:
+      operationId: publicGetTrip
+      summary: Retrieve a trip and its items
+      tags:
+      - Trips
+      parameters:
+      - $ref: '#/components/parameters/TripId'
+      responses:
+        '200':
+          description: Trip
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+  /trips/{tripId}/items:
+    post:
+      operationId: publicAddTripItem
+      summary: Add an existing booking to a trip
+      tags:
+      - Trips
+      parameters:
+      - $ref: '#/components/parameters/TripId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TripItemInput'
+            example:
+              bookingId: book_hotel_01
+              kind: HOTEL
+      responses:
+        '201':
+          description: Trip item added
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TripItemResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+  /trips/{tripId}/items/{itemId}/servicing/cancellation-preview:
+    post:
+      operationId: publicCreateCancellationPreview
+      summary: Preview hotel cancellation
+      tags:
+      - Trips
+      description: Returns a deterministic sandbox estimate. It does not contact a supplier or issue a refund. Previews expire at expiresAt and must not be used after expiry.
+      parameters:
+      - $ref: '#/components/parameters/TripId'
+      - $ref: '#/components/parameters/TripItemId'
+      responses:
+        '200':
+          description: Cancellation preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CancellationPreviewResponse'
+              example:
+                data:
+                  previewId: prev_01
+                  tripId: trip_01JTRIP
+                  itemId: item_01
+                  kind: HOTEL
+                  termsHash: sha256:abc
+                  refundable: true
+                  refundEstimate:
+                    amount: 120
+                    currency: CAD
+                  penaltyEstimate: null
+                  expiresAt: '2026-01-15T12:10:00Z'
+        '409':
+          $ref: '#/components/responses/Error'
+        '422':
+          $ref: '#/components/responses/Error'
+  /trips/{tripId}/items/{itemId}/servicing/cancel:
+    post:
+      operationId: publicCancelTripItem
+      summary: Cancel a hotel trip item
+      tags:
+      - Trips
+      description: Sandbox-only deterministic cancellation. The estimate is not a live refund. FLIGHT servicing is unsupported in this tranche. Use the same key to safely replay an ambiguous request.
+      parameters:
+      - $ref: '#/components/parameters/TripId'
+      - $ref: '#/components/parameters/TripItemId'
+      - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CancellationInput'
+            example:
+              previewId: prev_01
+              termsHash: sha256:abc
+              confirmed: true
+      responses:
+        '200':
+          description: Deterministic completion or exact idempotent replay
+          headers:
+            Idempotent-Replayed:
+              schema:
+                type: string
+                const: 'true'
+              description: Present only for an exact replay.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '202':
+          description: Outcome is UNKNOWN and requires receipt inspection; do not blind retry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '409':
+          description: Idempotency conflict or stale terms
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Preview expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          $ref: '#/components/responses/Error'
+  /trips/{tripId}/servicing/actions/{actionId}:
+    get:
+      operationId: publicGetServicingAction
+      summary: Retrieve a servicing action receipt
+      tags:
+      - Trips
+      parameters:
+      - $ref: '#/components/parameters/TripId'
+      - $ref: '#/components/parameters/ActionId'
+      responses:
+        '200':
+          description: Action receipt
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActionResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+components:
+  parameters:
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema:
+        type: string
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+    ActionId:
+      name: actionId
+      in: path
+      required: true
+      schema:
+        type: string
+    TripItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+  schemas:
+    TripInput:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+    TripItem:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - bookingId
+      - kind
+      - createdAt
+      - bookingStatus
+      - servicing
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+        createdAt:
+          type: string
+          format: date-time
+        bookingStatus:
+          type: string
+          enum:
+          - PENDING
+          - CONFIRMED
+          - FAILED
+          - CANCELLED
+          - UNKNOWN
+        servicing:
+          $ref: '#/components/schemas/TripItemServicing'
+    TripItemInput:
+      type: object
+      required:
+      - bookingId
+      - kind
+      additionalProperties: false
+      properties:
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+    TripItemServicing:
+      type: object
+      additionalProperties: false
+      required:
+      - cancellation
+      properties:
+        cancellation:
+          type: string
+          enum:
+          - SUPPORTED
+          - UNSUPPORTED
+          - UNAVAILABLE
+    TripListResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Trip'
+    ActionResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ServicingAction'
+    TripResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Trip'
+    ServicingAction:
+      type: object
+      additionalProperties: false
+      required:
+      - actionId
+      - tripId
+      - itemId
+      - kind
+      - operation
+      - previewId
+      - termsHash
+      - refundEstimate
+      - penaltyEstimate
+      - estimateOnly
+      - status
+      - createdAt
+      - updatedAt
+      properties:
+        actionId:
+          type: string
+        tripId:
+          type: string
+        itemId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+        operation:
+          type: string
+          const: HOTEL_CANCELLATION
+        previewId:
+          type: string
+        termsHash:
+          type: string
+        status:
+          type: string
+          enum:
+          - PENDING
+          - COMPLETED
+          - UNKNOWN
+          - FAILED
+        refundEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        penaltyEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        estimateOnly:
+          type: boolean
+          const: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    TripItemResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/TripItem'
+    CancellationInput:
+      type: object
+      required:
+      - previewId
+      - termsHash
+      - confirmed
+      additionalProperties: false
+      properties:
+        previewId:
+          type: string
+        termsHash:
+          type: string
+        confirmed:
+          type: boolean
+          const: true
+    Trip:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - createdAt
+      - updatedAt
+      - items
+      properties:
+        id:
+          type: string
+        name:
+          type:
+          - string
+          - 'null'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/TripItem'
+    CancellationPreview:
+      type: object
+      required:
+      - previewId
+      - tripId
+      - itemId
+      - kind
+      - termsHash
+      - refundable
+      - refundEstimate
+      - penaltyEstimate
+      - expiresAt
+      properties:
+        previewId:
+          type: string
+        tripId:
+          type: string
+        itemId:
+          type: string
+        kind:
+          type: string
+          const: HOTEL
+        termsHash:
+          type: string
+          description: Hash of the cancellation terms accepted by the caller.
+        refundable:
+          type: boolean
+        refundEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+          description: Estimate only; no refund is issued by this API.
+        penaltyEstimate:
+          oneOf:
+          - $ref: '#/components/schemas/Money'
+          - type: 'null'
+        expiresAt:
+          type: string
+          format: date-time
+    CancellationPreviewResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/CancellationPreview'
+  responses:
+    Error:
+      description: Public API error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  securitySchemes:
+    SandboxApiKey:
+      type: http
+      scheme: bearer
+      description: ZOE API sandbox credential (zoe_sandbox_ prefix). X-API-Key is also accepted.

@@ -1,0 +1,12 @@
+generated: '2026-10-02'
+method: none
+source: https://developers.bookitngo.com/llms.txt
+packages: []
+rejected:
+- name: '@bookitngo/zoe-sdk'
+  registry: npm
+  reason: 'registry has no such package: official downgraded (harvest-packages.py --audit)'
+- name: zoe_api
+  registry: pypi
+  reason: 'registry has no such package: official downgraded (harvest-packages.py --audit)'
+note: 'no first-party package: every candidate a model listed was unowned (harvest-packages.py --audit)'
