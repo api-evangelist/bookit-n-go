@@ -205,42 +205,7 @@ paths:
         '404':
           $ref: '#/components/responses/Error'
 components:
-  parameters:
-    TripId:
-      name: tripId
-      in: path
-      required: true
-      schema:
-        type: string
-    IdempotencyKey:
-      name: Idempotency-Key
-      in: header
-      required: true
-      schema:
-        type: string
-        minLength: 8
-        maxLength: 255
-    ActionId:
-      name: actionId
-      in: path
-      required: true
-      schema:
-        type: string
-    TripItemId:
-      name: itemId
-      in: path
-      required: true
-      schema:
-        type: string
   schemas:
-    TripInput:
-      type: object
-      additionalProperties: false
-      properties:
-        name:
-          type: string
-          minLength: 1
-          maxLength: 200
     ErrorResponse:
       type: object
       required:
@@ -261,78 +226,6 @@ components:
               - string
               - 'null'
             details: {}
-    Money:
-      type: object
-      required:
-      - amount
-      - currency
-      properties:
-        amount:
-          type: number
-          minimum: 0
-        currency:
-          type: string
-          minLength: 3
-          maxLength: 3
-    TripItem:
-      type: object
-      additionalProperties: false
-      required:
-      - id
-      - bookingId
-      - kind
-      - createdAt
-      - bookingStatus
-      - servicing
-      properties:
-        id:
-          type: string
-        bookingId:
-          type: string
-        kind:
-          type: string
-          enum:
-          - HOTEL
-          - FLIGHT
-        createdAt:
-          type: string
-          format: date-time
-        bookingStatus:
-          type: string
-          enum:
-          - PENDING
-          - CONFIRMED
-          - FAILED
-          - CANCELLED
-          - UNKNOWN
-        servicing:
-          $ref: '#/components/schemas/TripItemServicing'
-    TripItemInput:
-      type: object
-      required:
-      - bookingId
-      - kind
-      additionalProperties: false
-      properties:
-        bookingId:
-          type: string
-        kind:
-          type: string
-          enum:
-          - HOTEL
-          - FLIGHT
-    TripItemServicing:
-      type: object
-      additionalProperties: false
-      required:
-      - cancellation
-      properties:
-        cancellation:
-          type: string
-          enum:
-          - SUPPORTED
-          - UNSUPPORTED
-          - UNAVAILABLE
     TripListResponse:
       type: object
       required:
@@ -342,20 +235,21 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Trip'
-    ActionResponse:
+    CancellationPreviewResponse:
       type: object
       required:
       - data
       properties:
         data:
-          $ref: '#/components/schemas/ServicingAction'
-    TripResponse:
+          $ref: '#/components/schemas/CancellationPreview'
+    TripInput:
       type: object
-      required:
-      - data
+      additionalProperties: false
       properties:
-        data:
-          $ref: '#/components/schemas/Trip'
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
     ServicingAction:
       type: object
       additionalProperties: false
@@ -415,28 +309,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    TripItemResponse:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          $ref: '#/components/schemas/TripItem'
-    CancellationInput:
-      type: object
-      required:
-      - previewId
-      - termsHash
-      - confirmed
-      additionalProperties: false
-      properties:
-        previewId:
-          type: string
-        termsHash:
-          type: string
-        confirmed:
-          type: boolean
-          const: true
     Trip:
       type: object
       additionalProperties: false
@@ -462,6 +334,100 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TripItem'
+    TripItemResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/TripItem'
+    TripItem:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - bookingId
+      - kind
+      - createdAt
+      - bookingStatus
+      - servicing
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+        createdAt:
+          type: string
+          format: date-time
+        bookingStatus:
+          type: string
+          enum:
+          - PENDING
+          - CONFIRMED
+          - FAILED
+          - CANCELLED
+          - UNKNOWN
+        servicing:
+          $ref: '#/components/schemas/TripItemServicing'
+    CancellationInput:
+      type: object
+      required:
+      - previewId
+      - termsHash
+      - confirmed
+      additionalProperties: false
+      properties:
+        previewId:
+          type: string
+        termsHash:
+          type: string
+        confirmed:
+          type: boolean
+          const: true
+    TripItemServicing:
+      type: object
+      additionalProperties: false
+      required:
+      - cancellation
+      properties:
+        cancellation:
+          type: string
+          enum:
+          - SUPPORTED
+          - UNSUPPORTED
+          - UNAVAILABLE
+    TripResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/Trip'
+    ActionResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/ServicingAction'
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
     CancellationPreview:
       type: object
       required:
@@ -501,13 +467,47 @@ components:
         expiresAt:
           type: string
           format: date-time
-    CancellationPreviewResponse:
+    TripItemInput:
       type: object
       required:
-      - data
+      - bookingId
+      - kind
+      additionalProperties: false
       properties:
-        data:
-          $ref: '#/components/schemas/CancellationPreview'
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+  parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 8
+        maxLength: 255
+    TripItemId:
+      name: itemId
+      in: path
+      required: true
+      schema:
+        type: string
+    TripId:
+      name: tripId
+      in: path
+      required: true
+      schema:
+        type: string
+    ActionId:
+      name: actionId
+      in: path
+      required: true
+      schema:
+        type: string
   responses:
     Error:
       description: Public API error

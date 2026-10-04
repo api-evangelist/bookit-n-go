@@ -221,102 +221,40 @@ paths:
                 $ref: '#/components/schemas/ConsentResponse'
 components:
   schemas:
-    TravelerProfileInput:
+    Provenance:
       type: object
       additionalProperties: false
       required:
-      - displayName
+      - source
+      - observedAt
+      - method
       properties:
-        displayName:
+        source:
           type: string
           minLength: 1
-          maxLength: 200
-        contact:
-          $ref: '#/components/schemas/TravelerContact'
-        loyalty:
-          type: array
-          items:
-            type: object
-            additionalProperties: false
-            required:
-            - program
-            - memberId
-            properties:
-              program:
-                type: string
-              memberId:
-                type: string
-    AirlineConstraintInput:
-      type: object
-      additionalProperties: false
-      required:
-      - category
-      - operator
-      - value
-      - provenance
-      properties:
-        category:
-          type: string
-          const: AIRLINE
-        operator:
-          type: string
-          enum:
-          - IN
-          - NOT_IN
-        value:
-          type: array
-          minItems: 1
-          items:
-            type: string
-            minLength: 1
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        effectiveUntil:
+        observedAt:
           type: string
           format: date-time
-    TravelerProfilePatch:
+        method:
+          type: string
+          enum:
+          - DECLARED
+          - OBSERVED
+          - IMPORTED
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+    ConsentListResponse:
       type: object
       additionalProperties: false
+      required:
+      - data
       properties:
-        displayName:
-          type: string
-          minLength: 1
-          maxLength: 200
-        contact:
-          $ref: '#/components/schemas/TravelerContact'
-        loyalty:
+        data:
           type: array
           items:
-            type: object
-            additionalProperties: false
-            required:
-            - program
-            - memberId
-            properties:
-              program:
-                type: string
-              memberId:
-                type: string
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            requestId:
-              type:
-              - string
-              - 'null'
-            details: {}
+            $ref: '#/components/schemas/Consent'
     BudgetConstraintInput:
       type: object
       additionalProperties: false
@@ -340,14 +278,57 @@ components:
         effectiveUntil:
           type: string
           format: date-time
-    TravelerProfileResponse:
+    LocationConstraintInput:
       type: object
       additionalProperties: false
       required:
-      - data
+      - category
+      - operator
+      - value
+      - provenance
       properties:
-        data:
-          $ref: '#/components/schemas/TravelerProfile'
+        category:
+          type: string
+          const: LOCATION
+        operator:
+          type: string
+          enum:
+          - EQ
+          - IN
+        value:
+          oneOf:
+          - type: string
+            minLength: 1
+          - type: array
+            minItems: 1
+            items:
+              type: string
+              minLength: 1
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
     TravelContext:
       type: object
       additionalProperties: false
@@ -373,50 +354,58 @@ components:
           - FAMILY
           - COLLEAGUES
           - GROUP
-    Constraint:
+    TravelerProfilePatch:
+      type: object
+      additionalProperties: false
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contact:
+          $ref: '#/components/schemas/TravelerContact'
+        loyalty:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - program
+            - memberId
+            properties:
+              program:
+                type: string
+              memberId:
+                type: string
+    ConsentGrantInput:
       type: object
       additionalProperties: false
       required:
-      - id
-      - category
-      - operator
-      - value
+      - scope
+      - actor
       - provenance
-      - createdAt
-      - updatedAt
-      - effectiveUntil
+      - confirmed
       properties:
-        id:
-          type: string
-        category:
+        scope:
           type: string
           enum:
-          - MAX_CABIN
-          - BUDGET
-          - AIRLINE
-          - LOCATION
-        operator:
+          - PROFILE_READ
+          - PROFILE_WRITE
+          - PREFERENCE_WRITE
+          - BOOKING_PREPARE
+          - BOOKING_EXECUTE
+          - SERVICING_EXECUTE
+        expiresAt:
           type: string
-          enum:
-          - LTE
-          - EQ
-          - IN
-          - NOT_IN
-        value: {}
+          format: date-time
+        actor:
+          type: string
         provenance:
           $ref: '#/components/schemas/Provenance'
-        effectiveUntil:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-    ConsentListResponse:
+        confirmed:
+          type: boolean
+          const: true
+    ConstraintListResponse:
       type: object
       additionalProperties: false
       required:
@@ -425,7 +414,82 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/Consent'
+            $ref: '#/components/schemas/Constraint'
+    TravelerProfileResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/TravelerProfile'
+    TravelerContact:
+      type: object
+      additionalProperties: false
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        countryCallingCode:
+          type: string
+        countryOfResidence:
+          type: string
+    MaxCabinConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: MAX_CABIN
+        operator:
+          type: string
+          const: LTE
+        value:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    TravelerProfileInput:
+      type: object
+      additionalProperties: false
+      required:
+      - displayName
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 200
+        contact:
+          $ref: '#/components/schemas/TravelerContact'
+        loyalty:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - program
+            - memberId
+            properties:
+              program:
+                type: string
+              memberId:
+                type: string
     ConsentResponse:
       type: object
       additionalProperties: false
@@ -486,53 +550,6 @@ components:
         lastConfirmedAt:
           type: string
           format: date-time
-    ConstraintInput:
-      oneOf:
-      - $ref: '#/components/schemas/MaxCabinConstraintInput'
-      - $ref: '#/components/schemas/BudgetConstraintInput'
-      - $ref: '#/components/schemas/AirlineConstraintInput'
-      - $ref: '#/components/schemas/LocationConstraintInput'
-      discriminator:
-        propertyName: category
-    Provenance:
-      type: object
-      additionalProperties: false
-      required:
-      - source
-      - observedAt
-      - method
-      properties:
-        source:
-          type: string
-          minLength: 1
-        observedAt:
-          type: string
-          format: date-time
-        method:
-          type: string
-          enum:
-          - DECLARED
-          - OBSERVED
-          - IMPORTED
-        confidence:
-          type: number
-          minimum: 0
-          maximum: 1
-    TravelerContact:
-      type: object
-      additionalProperties: false
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          format: email
-        phone:
-          type: string
-        countryCallingCode:
-          type: string
-        countryOfResidence:
-          type: string
     PreferenceListResponse:
       type: object
       additionalProperties: false
@@ -543,6 +560,125 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Preference'
+    Consent:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - scope
+      - actor
+      - provenance
+      - status
+      - grantedAt
+      - effective
+      properties:
+        id:
+          type: string
+        scope:
+          type: string
+          enum:
+          - PROFILE_READ
+          - PROFILE_WRITE
+          - PREFERENCE_WRITE
+          - BOOKING_PREPARE
+          - BOOKING_EXECUTE
+          - SERVICING_EXECUTE
+        actor:
+          type: string
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        status:
+          type: string
+          enum:
+          - GRANTED
+          - REVOKED
+          - EXPIRED
+        grantedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        revokedAt:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        effective:
+          type: boolean
+    AirlineConstraintInput:
+      type: object
+      additionalProperties: false
+      required:
+      - category
+      - operator
+      - value
+      - provenance
+      properties:
+        category:
+          type: string
+          const: AIRLINE
+        operator:
+          type: string
+          enum:
+          - IN
+          - NOT_IN
+        value:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type: string
+          format: date-time
+    Constraint:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - category
+      - operator
+      - value
+      - provenance
+      - createdAt
+      - updatedAt
+      - effectiveUntil
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+          enum:
+          - MAX_CABIN
+          - BUDGET
+          - AIRLINE
+          - LOCATION
+        operator:
+          type: string
+          enum:
+          - LTE
+          - EQ
+          - IN
+          - NOT_IN
+        value: {}
+        provenance:
+          $ref: '#/components/schemas/Provenance'
+        effectiveUntil:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
     TravelerProfile:
       type: object
       additionalProperties: false
@@ -596,140 +732,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    MaxCabinConstraintInput:
-      type: object
-      additionalProperties: false
-      required:
-      - category
-      - operator
-      - value
-      - provenance
-      properties:
-        category:
-          type: string
-          const: MAX_CABIN
-        operator:
-          type: string
-          const: LTE
-        value:
-          type: string
-          enum:
-          - ECONOMY
-          - PREMIUM_ECONOMY
-          - BUSINESS
-          - FIRST
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        effectiveUntil:
-          type: string
-          format: date-time
-    LocationConstraintInput:
-      type: object
-      additionalProperties: false
-      required:
-      - category
-      - operator
-      - value
-      - provenance
-      properties:
-        category:
-          type: string
-          const: LOCATION
-        operator:
-          type: string
-          enum:
-          - EQ
-          - IN
-        value:
-          oneOf:
-          - type: string
-            minLength: 1
-          - type: array
-            minItems: 1
-            items:
-              type: string
-              minLength: 1
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        effectiveUntil:
-          type: string
-          format: date-time
-    ConsentGrantInput:
-      type: object
-      additionalProperties: false
-      required:
-      - scope
-      - actor
-      - provenance
-      - confirmed
-      properties:
-        scope:
-          type: string
-          enum:
-          - PROFILE_READ
-          - PROFILE_WRITE
-          - PREFERENCE_WRITE
-          - BOOKING_PREPARE
-          - BOOKING_EXECUTE
-          - SERVICING_EXECUTE
-        expiresAt:
-          type: string
-          format: date-time
-        actor:
-          type: string
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        confirmed:
-          type: boolean
-          const: true
-    Consent:
-      type: object
-      additionalProperties: false
-      required:
-      - id
-      - scope
-      - actor
-      - provenance
-      - status
-      - grantedAt
-      - effective
-      properties:
-        id:
-          type: string
-        scope:
-          type: string
-          enum:
-          - PROFILE_READ
-          - PROFILE_WRITE
-          - PREFERENCE_WRITE
-          - BOOKING_PREPARE
-          - BOOKING_EXECUTE
-          - SERVICING_EXECUTE
-        actor:
-          type: string
-        provenance:
-          $ref: '#/components/schemas/Provenance'
-        status:
-          type: string
-          enum:
-          - GRANTED
-          - REVOKED
-          - EXPIRED
-        grantedAt:
-          type: string
-          format: date-time
-        expiresAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        revokedAt:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        effective:
-          type: boolean
     Preference:
       type: object
       additionalProperties: false
@@ -808,24 +810,15 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ConstraintListResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - data
-      properties:
-        data:
-          type: array
-          items:
-            $ref: '#/components/schemas/Constraint'
+    ConstraintInput:
+      oneOf:
+      - $ref: '#/components/schemas/MaxCabinConstraintInput'
+      - $ref: '#/components/schemas/BudgetConstraintInput'
+      - $ref: '#/components/schemas/AirlineConstraintInput'
+      - $ref: '#/components/schemas/LocationConstraintInput'
+      discriminator:
+        propertyName: category
   parameters:
-    ProfileId:
-      name: profileId
-      in: path
-      required: true
-      schema:
-        type: string
-        minLength: 1
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -834,6 +827,13 @@ components:
         type: string
         minLength: 8
         maxLength: 255
+    ProfileId:
+      name: profileId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
     ConsentId:
       name: consentId
       in: path

@@ -94,6 +94,114 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   schemas:
+    AgentExecuteInput:
+      type: object
+      additionalProperties: false
+      required:
+      - confirmed
+      properties:
+        confirmed:
+          type: boolean
+          const: true
+    HotelBookingPrepareActionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - action
+      - intent
+      - actor
+      properties:
+        profileId:
+          type: string
+        action:
+          type: string
+          const: HOTEL_BOOKING_PREPARE
+        intent:
+          $ref: '#/components/schemas/HotelBookingPrepareIntent'
+        actor:
+          type: string
+          minLength: 1
+    RecommendationReceiptResponse:
+      type: object
+      required:
+      - data
+      properties:
+        data:
+          type: object
+          required:
+          - receiptId
+          - version
+          - candidates
+          - decision
+          - rules
+          properties:
+            receiptId:
+              type: string
+            version:
+              type: string
+            candidates:
+              type: array
+              items:
+                type: object
+            decision:
+              type: object
+            rules:
+              type: object
+    HotelBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required:
+      - offerId
+      properties:
+        offerId:
+          type: string
+        totalAmount:
+          type: number
+          minimum: 0
+        location:
+          type: string
+    AgentActionInput:
+      oneOf:
+      - $ref: '#/components/schemas/HotelCancelActionInput'
+      - $ref: '#/components/schemas/FlightBookingPrepareActionInput'
+      - $ref: '#/components/schemas/HotelBookingPrepareActionInput'
+      discriminator:
+        propertyName: action
+        mapping:
+          HOTEL_CANCEL: '#/components/schemas/HotelCancelActionInput'
+          FLIGHT_BOOKING_PREPARE: '#/components/schemas/FlightBookingPrepareActionInput'
+          HOTEL_BOOKING_PREPARE: '#/components/schemas/HotelBookingPrepareActionInput'
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
+    ActionReceipt:
+      $ref: '#/components/schemas/AgentAction'
+    AgentActionResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - data
+      properties:
+        data:
+          $ref: '#/components/schemas/AgentAction'
     FlightBookingPrepareActionInput:
       type: object
       additionalProperties: false
@@ -130,6 +238,45 @@ components:
           type: string
         termsHash:
           type: string
+    HotelCancelActionInput:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - action
+      - intent
+      - actor
+      properties:
+        profileId:
+          type: string
+        action:
+          type: string
+          const: HOTEL_CANCEL
+        intent:
+          $ref: '#/components/schemas/HotelCancelIntent'
+        actor:
+          type: string
+          minLength: 1
+    FlightBookingPrepareIntent:
+      type: object
+      additionalProperties: false
+      required:
+      - offerId
+      properties:
+        offerId:
+          type: string
+        cabin:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+        airline:
+          type: string
+        totalAmount:
+          type: number
+          minimum: 0
     ActionReceiptResponse:
       type: object
       additionalProperties: false
@@ -138,14 +285,6 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/ActionReceipt'
-    AgentActionResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - data
-      properties:
-        data:
-          $ref: '#/components/schemas/AgentAction'
     AgentAction:
       type: object
       additionalProperties: false
@@ -219,145 +358,6 @@ components:
         updatedAt:
           type: string
           format: date-time
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            requestId:
-              type:
-              - string
-              - 'null'
-            details: {}
-    HotelBookingPrepareActionInput:
-      type: object
-      additionalProperties: false
-      required:
-      - profileId
-      - action
-      - intent
-      - actor
-      properties:
-        profileId:
-          type: string
-        action:
-          type: string
-          const: HOTEL_BOOKING_PREPARE
-        intent:
-          $ref: '#/components/schemas/HotelBookingPrepareIntent'
-        actor:
-          type: string
-          minLength: 1
-    AgentExecuteInput:
-      type: object
-      additionalProperties: false
-      required:
-      - confirmed
-      properties:
-        confirmed:
-          type: boolean
-          const: true
-    ActionReceipt:
-      $ref: '#/components/schemas/AgentAction'
-    HotelCancelActionInput:
-      type: object
-      additionalProperties: false
-      required:
-      - profileId
-      - action
-      - intent
-      - actor
-      properties:
-        profileId:
-          type: string
-        action:
-          type: string
-          const: HOTEL_CANCEL
-        intent:
-          $ref: '#/components/schemas/HotelCancelIntent'
-        actor:
-          type: string
-          minLength: 1
-    FlightBookingPrepareIntent:
-      type: object
-      additionalProperties: false
-      required:
-      - offerId
-      properties:
-        offerId:
-          type: string
-        cabin:
-          type: string
-          enum:
-          - ECONOMY
-          - PREMIUM_ECONOMY
-          - BUSINESS
-          - FIRST
-        airline:
-          type: string
-        totalAmount:
-          type: number
-          minimum: 0
-    HotelBookingPrepareIntent:
-      type: object
-      additionalProperties: false
-      required:
-      - offerId
-      properties:
-        offerId:
-          type: string
-        totalAmount:
-          type: number
-          minimum: 0
-        location:
-          type: string
-    AgentActionInput:
-      oneOf:
-      - $ref: '#/components/schemas/HotelCancelActionInput'
-      - $ref: '#/components/schemas/FlightBookingPrepareActionInput'
-      - $ref: '#/components/schemas/HotelBookingPrepareActionInput'
-      discriminator:
-        propertyName: action
-        mapping:
-          HOTEL_CANCEL: '#/components/schemas/HotelCancelActionInput'
-          FLIGHT_BOOKING_PREPARE: '#/components/schemas/FlightBookingPrepareActionInput'
-          HOTEL_BOOKING_PREPARE: '#/components/schemas/HotelBookingPrepareActionInput'
-    RecommendationReceiptResponse:
-      type: object
-      required:
-      - data
-      properties:
-        data:
-          type: object
-          required:
-          - receiptId
-          - version
-          - candidates
-          - decision
-          - rules
-          properties:
-            receiptId:
-              type: string
-            version:
-              type: string
-            candidates:
-              type: array
-              items:
-                type: object
-            decision:
-              type: object
-            rules:
-              type: object
   responses:
     Error:
       description: Public API error
@@ -366,6 +366,13 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
   parameters:
+    ReceiptId:
+      name: receiptId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 1
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -374,13 +381,6 @@ components:
         type: string
         minLength: 8
         maxLength: 255
-    ReceiptId:
-      name: receiptId
-      in: path
-      required: true
-      schema:
-        type: string
-        minLength: 1
   securitySchemes:
     SandboxApiKey:
       type: http

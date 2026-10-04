@@ -122,39 +122,45 @@ webhooks:
           description: Consumer rejected the event
 components:
   schemas:
-    TripItem:
+    WebhookInput:
       type: object
-      additionalProperties: false
       required:
-      - id
-      - bookingId
-      - kind
-      - createdAt
-      - bookingStatus
-      - servicing
+      - url
+      - eventTypes
       properties:
-        id:
+        url:
           type: string
-        bookingId:
+          format: uri
+          pattern: ^https://
+        eventTypes:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+            - flight.booking.created
+            - flight.booking.updated
+            - hotel.booking.created
+            - hotel.booking.updated
+            - trip.created
+            - trip.item.added
+            - hotel.booking.cancelled
+            - servicing.action.completed
+            - servicing.action.unknown
+    Money:
+      type: object
+      required:
+      - amount
+      - currency
+      properties:
+        amount:
+          type: number
+          minimum: 0
+        currency:
           type: string
-        kind:
-          type: string
-          enum:
-          - HOTEL
-          - FLIGHT
-        createdAt:
-          type: string
-          format: date-time
-        bookingStatus:
-          type: string
-          enum:
-          - PENDING
-          - CONFIRMED
-          - FAILED
-          - CANCELLED
-          - UNKNOWN
-        servicing:
-          $ref: '#/components/schemas/TripItemServicing'
+          minLength: 3
+          maxLength: 3
     ServicingAction:
       type: object
       additionalProperties: false
@@ -292,6 +298,39 @@ components:
           properties:
             id:
               type: string
+    TripItem:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - bookingId
+      - kind
+      - createdAt
+      - bookingStatus
+      - servicing
+      properties:
+        id:
+          type: string
+        bookingId:
+          type: string
+        kind:
+          type: string
+          enum:
+          - HOTEL
+          - FLIGHT
+        createdAt:
+          type: string
+          format: date-time
+        bookingStatus:
+          type: string
+          enum:
+          - PENDING
+          - CONFIRMED
+          - FAILED
+          - CANCELLED
+          - UNKNOWN
+        servicing:
+          $ref: '#/components/schemas/TripItemServicing'
     ErrorResponse:
       type: object
       required:
@@ -324,32 +363,6 @@ components:
           - SUPPORTED
           - UNSUPPORTED
           - UNAVAILABLE
-    WebhookInput:
-      type: object
-      required:
-      - url
-      - eventTypes
-      properties:
-        url:
-          type: string
-          format: uri
-          pattern: ^https://
-        eventTypes:
-          type: array
-          minItems: 1
-          uniqueItems: true
-          items:
-            type: string
-            enum:
-            - flight.booking.created
-            - flight.booking.updated
-            - hotel.booking.created
-            - hotel.booking.updated
-            - trip.created
-            - trip.item.added
-            - hotel.booking.cancelled
-            - servicing.action.completed
-            - servicing.action.unknown
     Trip:
       type: object
       additionalProperties: false
@@ -375,19 +388,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/TripItem'
-    Money:
-      type: object
-      required:
-      - amount
-      - currency
-      properties:
-        amount:
-          type: number
-          minimum: 0
-        currency:
-          type: string
-          minLength: 3
-          maxLength: 3
   responses:
     Error:
       description: Public API error

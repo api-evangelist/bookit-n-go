@@ -1,7 +1,7 @@
 {
   "provider": "bookit-n-go",
   "sources": [
-    "bookit-n-go-openapi.yaml"
+    "_original/bookit-n-go-openapi.yaml"
   ],
   "outputs": [
     "bookit-n-go-agent-api-openapi.yml",
@@ -11,14 +11,20 @@
     "bookit-n-go-trips-api-openapi.yml",
     "bookit-n-go-webhooks-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/bookit-n-go-openapi.yaml"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "bookit-n-go-openapi.yaml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
-    "apis.yml register: written (+6 apis, 6 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "bookit-n-go-agent-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bookit-n-go-flights-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bookit-n-go-hotels-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bookit-n-go-travelers-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bookit-n-go-trips-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "bookit-n-go-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

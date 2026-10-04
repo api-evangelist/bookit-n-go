@@ -134,6 +134,20 @@ paths:
           $ref: '#/components/responses/Error'
 components:
   schemas:
+    Contact:
+      type: object
+      required:
+      - email
+      properties:
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        countryCallingCode:
+          type: string
+        countryOfResidence:
+          type: string
     FlightOfferList:
       type: object
       required:
@@ -151,6 +165,43 @@ components:
             environment:
               type: string
               const: SANDBOX
+    FlightBookingInput:
+      type: object
+      required:
+      - offerId
+      - travellers
+      - contact
+      properties:
+        offerId:
+          type: string
+        acceptedTotal:
+          $ref: '#/components/schemas/Money'
+        contact:
+          $ref: '#/components/schemas/Contact'
+        travellers:
+          type: array
+          minItems: 1
+          items:
+            type: object
+            required:
+            - type
+            - firstName
+            - lastName
+            - dateOfBirth
+            properties:
+              type:
+                type: string
+                enum:
+                - ADULT
+                - CHILD
+                - INFANT
+              firstName:
+                type: string
+              lastName:
+                type: string
+              dateOfBirth:
+                type: string
+                format: date
     BookingResponse:
       type: object
       required:
@@ -158,108 +209,6 @@ components:
       properties:
         data:
           $ref: '#/components/schemas/Booking'
-    RecommendationRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - profileId
-      - offerIds
-      properties:
-        profileId:
-          type: string
-          minLength: 1
-        offerIds:
-          type: array
-          minItems: 1
-          maxItems: 100
-          items:
-            type: string
-        context:
-          $ref: '#/components/schemas/TravelContext'
-    FlightSearch:
-      type: object
-      required:
-      - origin
-      - destination
-      - departureDate
-      - tripType
-      - adults
-      properties:
-        origin:
-          type: string
-          minLength: 3
-          maxLength: 3
-        destination:
-          type: string
-          minLength: 3
-          maxLength: 3
-        departureDate:
-          type: string
-          format: date
-        returnDate:
-          type: string
-          format: date
-        tripType:
-          type: string
-          enum:
-          - ONE_WAY
-          - ROUND_TRIP
-        adults:
-          type: integer
-          minimum: 1
-        children:
-          type: integer
-          minimum: 0
-          default: 0
-        infants:
-          type: integer
-          minimum: 0
-          default: 0
-        cabin:
-          type: string
-          enum:
-          - ECONOMY
-          - PREMIUM_ECONOMY
-          - BUSINESS
-          - FIRST
-          default: ECONOMY
-        currency:
-          type: string
-          default: CAD
-    ErrorResponse:
-      type: object
-      required:
-      - error
-      properties:
-        error:
-          type: object
-          required:
-          - code
-          - message
-          properties:
-            code:
-              type: string
-            message:
-              type: string
-            requestId:
-              type:
-              - string
-              - 'null'
-            details: {}
-    Contact:
-      type: object
-      required:
-      - email
-      properties:
-        email:
-          type: string
-          format: email
-        phone:
-          type: string
-        countryCallingCode:
-          type: string
-        countryOfResidence:
-          type: string
     Money:
       type: object
       required:
@@ -347,43 +296,6 @@ components:
           type: string
         context:
           $ref: '#/components/schemas/TravelContext'
-    FlightBookingInput:
-      type: object
-      required:
-      - offerId
-      - travellers
-      - contact
-      properties:
-        offerId:
-          type: string
-        acceptedTotal:
-          $ref: '#/components/schemas/Money'
-        contact:
-          $ref: '#/components/schemas/Contact'
-        travellers:
-          type: array
-          minItems: 1
-          items:
-            type: object
-            required:
-            - type
-            - firstName
-            - lastName
-            - dateOfBirth
-            properties:
-              type:
-                type: string
-                enum:
-                - ADULT
-                - CHILD
-                - INFANT
-              firstName:
-                type: string
-              lastName:
-                type: string
-              dateOfBirth:
-                type: string
-                format: date
     TravelContext:
       type: object
       additionalProperties: false
@@ -409,6 +321,26 @@ components:
           - FAMILY
           - COLLEAGUES
           - GROUP
+    ErrorResponse:
+      type: object
+      required:
+      - error
+      properties:
+        error:
+          type: object
+          required:
+          - code
+          - message
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            requestId:
+              type:
+              - string
+              - 'null'
+            details: {}
     Booking:
       type: object
       required:
@@ -442,7 +374,87 @@ components:
         createdAt:
           type: string
           format: date-time
+    FlightSearch:
+      type: object
+      required:
+      - origin
+      - destination
+      - departureDate
+      - tripType
+      - adults
+      properties:
+        origin:
+          type: string
+          minLength: 3
+          maxLength: 3
+        destination:
+          type: string
+          minLength: 3
+          maxLength: 3
+        departureDate:
+          type: string
+          format: date
+        returnDate:
+          type: string
+          format: date
+        tripType:
+          type: string
+          enum:
+          - ONE_WAY
+          - ROUND_TRIP
+        adults:
+          type: integer
+          minimum: 1
+        children:
+          type: integer
+          minimum: 0
+          default: 0
+        infants:
+          type: integer
+          minimum: 0
+          default: 0
+        cabin:
+          type: string
+          enum:
+          - ECONOMY
+          - PREMIUM_ECONOMY
+          - BUSINESS
+          - FIRST
+          default: ECONOMY
+        currency:
+          type: string
+          default: CAD
+    RecommendationRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - profileId
+      - offerIds
+      properties:
+        profileId:
+          type: string
+          minLength: 1
+        offerIds:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+        context:
+          $ref: '#/components/schemas/TravelContext'
   parameters:
+    OfferId:
+      name: offerId
+      in: path
+      required: true
+      schema:
+        type: string
+    BookingId:
+      name: bookingId
+      in: path
+      required: true
+      schema:
+        type: string
     IdempotencyKey:
       name: Idempotency-Key
       in: header
@@ -451,18 +463,6 @@ components:
         type: string
         minLength: 8
         maxLength: 255
-    BookingId:
-      name: bookingId
-      in: path
-      required: true
-      schema:
-        type: string
-    OfferId:
-      name: offerId
-      in: path
-      required: true
-      schema:
-        type: string
   responses:
     Error:
       description: Public API error
