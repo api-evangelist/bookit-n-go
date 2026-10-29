@@ -64,5 +64,133 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Bookit N Go is a company surfaced via the API Evangelist harvest backlog (source: secondary-market) and added to the network as a stub for full-pipeline profiling.
-- https://www.nasdaqprivatemarket.com/
+Bookit N Go is an AI‑powered travel technology SaaS platform that provides white‑labeled solutions for OTAs, corporate travel managers, TMCs, distributors and startups. Their suite includes the Zoe AI engine for conversational booking, the Nevo corporate travel platform, Trava consumer portal, and Nexel B2B partner platform, enabling rapid launch of branded travel services with full data control and AI‑driven personalization.
+
+**Areas:** Travel · Software-as-a-Service · Artificial Intelligence · White Label · B2B
+
+## Bookit N Go on APIs.io
+
+Everything profiled for Bookit N Go is published on APIs.io rather than in this repository. Start at the provider page — **[apis.io/providers/bookit-n-go/](https://apis.io/providers/bookit-n-go/)** — or go straight to one of the APIs or properties below.
+
+### APIs (6)
+
+- [Bookit N Go Agent API](https://apis.io/apis/bookit-n-go/bookit-n-go-agent-api/) — Supplier-neutral, consent-bound agent actions and receipts
+- [Bookit N Go Flights API](https://apis.io/apis/bookit-n-go/bookit-n-go-flights-api/) — Sandbox flight search, validation, fare, and booking operations
+- [Bookit N Go Hotels API](https://apis.io/apis/bookit-n-go/bookit-n-go-hotels-api/) — Sandbox hotel search, validation, and booking operations
+- [Bookit N Go Travelers API](https://apis.io/apis/bookit-n-go/bookit-n-go-travelers-api/) — App-scoped traveler profiles, preferences, constraints, and consent
+- [Bookit N Go Trips API](https://apis.io/apis/bookit-n-go/bookit-n-go-trips-api/) — Sandbox trip grouping and hotel servicing workflows
+- [Bookit N Go Webhooks API](https://apis.io/apis/bookit-n-go/bookit-n-go-webhooks-api/) — App-scoped webhook endpoint configuration and delivery history
+
+### Published properties
+
+Each property below is a page on APIs.io carrying the machine-readable artifact and what it says.
+
+#### AsyncAPI (1)
+
+Event-driven and webhook contracts.
+
+- [Bookit N Go Webhooks](https://apis.io/asyncapis/bookit-n-go/bookit-n-go-webhooks/)
+
+#### Agentic access (1)
+
+Which operations an agent can call, which act, and which need a human in the loop.
+
+- [Bookit N Go Agentic Access](https://apis.io/agentic-access/bookit-n-go/bookit-n-go-agentic-access/)
+
+#### JSON Schema (6)
+
+The data models the API reads and writes.
+
+- [FlightBookingInput](https://apis.io/schemas/bookit-n-go/bookit-n-go-flight-booking-input/)
+- [FlightSearch](https://apis.io/schemas/bookit-n-go/bookit-n-go-flight-search/)
+- [HotelBookingInput](https://apis.io/schemas/bookit-n-go/bookit-n-go-hotel-booking-input/)
+- [HotelSearch](https://apis.io/schemas/bookit-n-go/bookit-n-go-hotel-search/)
+- [PreferenceInput](https://apis.io/schemas/bookit-n-go/bookit-n-go-preference-input/)
+- [RecommendationResponse](https://apis.io/schemas/bookit-n-go/bookit-n-go-recommendation-response/)
+
+#### JSON-LD (1)
+
+Linked-data contexts for the provider's vocabulary.
+
+- [Bookit N Go Context](https://apis.io/jsonld/bookit-n-go/bookit-n-go-context/)
+
+#### Overlays (1)
+
+OpenAPI overlays, including conversational phrasing for each operation.
+
+- [Bookit N Go Openapi Overlay](https://apis.io/overlays/bookit-n-go/bookit-n-go-openapi-overlay/)
+
+#### Governance rules (1)
+
+Spectral rulesets for the provider's contracts.
+
+- [Bookit N Go API Rules](https://apis.io/rules/bookit-n-go/bookit-n-go-rules/)
+
+#### Security (2)
+
+Authentication, trust centre, and vulnerability disclosure.
+
+- [Bookit N Go Authentication](https://apis.io/security/bookit-n-go/bookit-n-go-authentication/)
+- [Bookit N Go Domain Security](https://apis.io/security/bookit-n-go/bookit-n-go-domain-security/)
+
+## Where to find this API
+
+Links to the company's own pages. This repository publishes no copy of their specifications — the canonical document is theirs and lives at the URLs below.
+
+- [Website](https://www.bookitngo.com/)
+- [Documentation](https://www.bookitngo.com/about)
+- [API reference](https://developers.bookitngo.com/llms.txt)
+- [Blog](https://www.bookitngo.com/blog)
+
+## API Evangelist rating
+
+**Kin Score 34.8** — thin · rubric 0.24.0 · scored 2026-10-17
+
+| Facet | Score |
+|---|---|
+| Discoverability | 73.2 |
+| Contract quality | 64.0 |
+| Contract governance | 22.0 |
+| Operational transparency | 7.9 |
+| Developer ergonomics | 42.3 |
+| Access clarity | 0.0 |
+
+**Agent readiness 39.0** — agent-native
+
+| Agent-readiness dimension | Result |
+|---|---|
+| Spec Presence | yes |
+| Agentic Access | derived (partial credit) |
+| Reversibility Documented | documented (partial credit) |
+| MCP Server | — |
+| Auth Clarity | bearer (partial credit) |
+| Idempotency | verified |
+| Error Semantics | verified |
+| OpenAPI Examples | partial |
+| Rate Limit Signal | — |
+| Event Surface Described | yes |
+| Agent Skills | derived (partial credit) |
+| Well Known Catalog | — |
+| Consent Identity | — |
+| Agent Card | — |
+| Dry Run Mode | — |
+| Delegated Identity | — |
+| Protected Resource Metadata | — |
+| Dynamic Client Registration | — |
+| Agentic Commerce | — |
+
+**Regulatory alignment 15.5** — Horizontal (data, software, accessibility, platform)
+
+The rubric is published at [github.com/api-evangelist/kin-score](https://github.com/api-evangelist/kin-score). The per-check breakdown behind these numbers — which checks were earned, partial or missed — along with score history and how this provider compares to its peers, is available at [apis.io/providers/bookit-n-go/](https://apis.io/providers/bookit-n-go/).
+
+## How this profile is made
+
+API Evangelist profiles a company's public API surface the way a developer would find it: the website, developer portal and documentation, the specifications it publishes, its public repositories, and its pricing, status and changelog pages. From that it derives the properties above — contracts split per API, workflows, schemas, collections, governance rules, plans and rate limits — and scores them against the published [Kin Score rubric](https://github.com/api-evangelist/kin-score).
+
+The artifacts are published on [APIs.io](https://apis.io), not in this repository. This repository is the public record for Bookit N Go: the place to say something is wrong, missing or out of date, and to ask for a re-score or a removal.
+
+## Open an issue
+
+- **Something about this listing** — a wrong description, a missing API, a stale artifact or a question about the rating: [open an issue on this repository](https://github.com/api-evangelist/bookit-n-go/issues/new).
+- **A new API, or one that is not in the catalog yet** — [submit it on APIs.io](https://apis.io/add/).
+- **Anything else** — [the APIs.io inbox](https://github.com/api-search/inbox/issues/new) or [info@apievangelist.com](mailto:info@apievangelist.com).
